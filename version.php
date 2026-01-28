@@ -20,7 +20,7 @@
  * @package    qtype
  * @subpackage essaysimilarity
  * @copyright  2022 Atthoriq Adillah Wicaksana (thoriqadillah59@gmail.com)
- * @copyright  based on work by 2018 Gordon Bateson 
+ * @copyright  based on work by 2018 Gordon Bateson
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,9 +29,9 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->cron      = 0;
 $plugin->component = 'qtype_essaysimilarity';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->requires  = 2015111600; // Moodle 3.0
-$plugin->version   = 2023062200;
-$plugin->release   = '2023-06-22 (2)';
+$plugin->requires  = 2024100700; // Moodle 5.1
+$plugin->version   = 2026012800;
+$plugin->release   = '1.1.0';
 
 // https://docs.moodle.org/dev/Releases
 // Moodle 3.11 2021051700 17 May 20`21

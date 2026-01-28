@@ -30,176 +30,246 @@ require_once($CFG->libdir . '/questionlib.php');
 require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->dirroot . '/question/type/essaysimilarity/question.php');
 
+/**
+ * Question type class for the essay similarity question type.
+ *
+ * @copyright  2022 Atthoriq Adillah Wicaksana (thoriqadillah59@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class qtype_essaysimilarity extends question_type {
-  // Show/hide values for dropdown
-  const SHOW_NONE                  = 0;
-  const SHOW_STUDENTS_ONLY         = 1;
-  const SHOW_TEACHERS_ONLY         = 2;
-  const SHOW_TEACHERS_AND_STUDENTS = 3;
+    /** @var int Show to nobody */
+    const SHOW_NONE                  = 0;
+    /** @var int Show to students only */
+    const SHOW_STUDENTS_ONLY         = 1;
+    /** @var int Show to teachers only */
+    const SHOW_TEACHERS_ONLY         = 2;
+    /** @var int Show to both teachers and students */
+    const SHOW_TEACHERS_AND_STUDENTS = 3;
 
-  const DEFAULT_UPPER_CORRECTNESS = 0.99;
-  const DEFAULT_LOWER_CORRECTNESS = 0.01;
+    /** @var float Default upper correctness threshold */
+    const DEFAULT_UPPER_CORRECTNESS = 0.99;
+    /** @var float Default lower correctness threshold */
+    const DEFAULT_LOWER_CORRECTNESS = 0.01;
 
-  const EMPTY = '';
+    /** @var string Empty string constant */
+    const EMPTY = '';
 
-  /**
-   * Constant value for question language options
-   */
-  const NO_LANG = 'none';
+    /**
+     * Constant value for question language options.
+     */
+    const NO_LANG = 'none';
 
-  public function is_manual_graded() {
-    return true;
-  }
-
-  public function extra_question_fields() {
-    // DB table name of the plugin is the first index, the rest is table column of the plugin table
-    return [
-      "qtype_essaysimilarity_option", 
-      "responseformat",            
-      "responserequired",
-      "responsefieldlines",
-      "minwordlimit",
-      "maxwordlimit",
-      "attachments",
-      "attachmentsrequired",
-      "maxbytes",
-      "filetypeslist",
-      "graderinfo",
-      "graderinfoformat",
-      "showfeedback",
-      "answerkey",
-      "answerkeyformat",
-      "showanswerkey",
-      "showtextstats",
-      "textstatitems",
-      "responsetemplate",
-      "responsetemplateformat",
-      "questionlanguage",
-      "upper_correctness",
-      "lower_correctness",
-    ];
-  }
-
-  public function response_file_areas() {
-    return ['attachments', 'answer'];
-  }
-
-  public function get_question_options($question) {
-    parent::get_question_options($question);
-  }
-
-  public function save_question_options($question) {
-    global $DB;
-
-    $plugin = $this->plugin_name();
-    $plugintable = 'qtype_essaysimilarity_option';
-
-    $graderinfo = $this->import_or_save_files($question->graderinfo, $question->context, $plugin, 'graderinfo', $question->id);
-    $oldquestion = $DB->get_record($plugintable, ['questionid' => $question->id]);
-
-    $textstatitems = '';
-    if (!empty($question->textstatitems)) {
-      $textstatitems = $question->textstatitems;
-      $textstatitems = array_keys($textstatitems);
-      $textstatitems = implode(',', $textstatitems);
+    /**
+     * Check if this question type is manually graded.
+     *
+     * @return bool Always returns true
+     */
+    public function is_manual_graded() {
+        return true;
     }
 
-    $newquestion = (object) [
-      "questionid"              => $question->id,
-      "responseformat"          => $question->responseformat,
-      "responserequired"        => $question->responserequired,
-      "responsefieldlines"      => $question->responsefieldlines,
-      "minwordlimit"            => isset($question->minwordlimit) ? $question->minwordlimit : 0,
-      "maxwordlimit"            => isset($question->maxwordlimit) ? $question->maxwordlimit : 0,
-      "attachments"             => $question->attachments,
-      "attachmentsrequired"     => $question->attachmentsrequired,
-      "maxbytes"                => isset($question->maxbytes) ? $question->maxbytes : 0,
-      "filetypeslist"           => isset($question->filetypeslist) ? $question->filetypeslist : self::EMPTY,
-      "graderinfo"              => $graderinfo,
-      "graderinfoformat"        => $question->graderinfo['format'],
-      "showfeedback"            => $question->showfeedback,
-      "answerkey"               => $question->answerkey['text'],
-      "answerkeyformat"         => $question->answerkey['format'],
-      "showanswerkey"           => $question->showanswerkey,
-      "showtextstats"           => $question->showtextstats,
-      "textstatitems"           => $textstatitems,
-      "responsetemplate"        => isset($question->responsetemplate['text']) ? $question->responsetemplate['text'] : self::EMPTY,
-      "responsetemplateformat"  => isset($question->responsetemplate['format']) ? $question->responsetemplate['format'] : 0,
-      "questionlanguage"        => isset($question->questionlanguage) ? $question->questionlanguage : self::NO_LANG,
-      "upper_correctness"       => $question->upper_correctness ? $question->upper_correctness : self::DEFAULT_UPPER_CORRECTNESS,
-      "lower_correctness"       => $question->lower_correctness ? $question->lower_correctness : self::DEFAULT_LOWER_CORRECTNESS,
-    ];
-
-    if ($oldquestion) {
-      $newquestion->id = $oldquestion->id;
-      $DB->update_record($plugintable, $newquestion);
-    } else {
-      $DB->insert_record($plugintable, $newquestion);
+    /**
+     * Define extra question fields stored in the plugin table.
+     *
+     * @return array Field definitions
+     */
+    public function extra_question_fields() {
+        // DB table name of the plugin is the first index, the rest is table column of the plugin table.
+        return [
+        "qtype_essaysimilarity_option",
+        "responseformat",
+        "responserequired",
+        "responsefieldlines",
+        "minwordlimit",
+        "maxwordlimit",
+        "attachments",
+        "attachmentsrequired",
+        "maxbytes",
+        "filetypeslist",
+        "graderinfo",
+        "graderinfoformat",
+        "showfeedback",
+        "answerkey",
+        "answerkeyformat",
+        "showanswerkey",
+        "showtextstats",
+        "textstatitems",
+        "responsetemplate",
+        "responsetemplateformat",
+        "questionlanguage",
+        "upper_correctness",
+        "lower_correctness",
+        ];
     }
-  }
 
-  public function delete_question($questionid, $contextid) {
-    global $DB;
-
-    $DB->delete_records('qtype_essaysimilarity_option', ['questionid' => $questionid]);
-    parent::delete_question($questionid, $contextid);
-  }
-
-  protected function initialise_question_instance(question_definition $question, $questiondata) {
-    parent::initialise_question_instance($question, $questiondata);
-
-    $defaults = self::get_defaults();
-    foreach ($defaults as $name => $default) {
-      $question->$name = isset($questiondata->options->$name) ? $questiondata->options->$name : $default;
+    /**
+     * List of file areas for responses.
+     *
+     * @return array File area names
+     */
+    public function response_file_areas() {
+        return ['attachments', 'answer'];
     }
-  }
 
-  /**
-   * Get default values of the question
-   */
-  public static function get_defaults() {
-    return [
-      "responseformat"          => 'editor',
-      "responserequired"        => 1,
-      "responsefieldlines"      => 10,
-      "minwordlimit"            => 0,
-      "maxwordlimit"            => 0,
-      "attachments"             => 0,
-      "attachmentsrequired"     => 0,
-      "maxbytes"                => 0,
-      "filetypeslist"           => self::EMPTY,
-      "graderinfo"              => self::EMPTY,
-      "graderinfoformat"        => 0,
-      "showfeedback"            => self::SHOW_TEACHERS_AND_STUDENTS,
-      "answerkey"               => self::EMPTY,
-      "answerkeyformat"         => 1,
-      "showanswerkey"           => self::SHOW_NONE,
-      "showtextstats"           => self::SHOW_TEACHERS_ONLY,
-      "textstatitems"           => self::EMPTY,
-      "responsetemplate"        => self::EMPTY,
-      "responsetemplateformat"  => 0,
-      "questionlanguage"        => self::NO_LANG,
-      "upper_correctness"       => self::DEFAULT_UPPER_CORRECTNESS,
-      "lower_correctness"       => self::DEFAULT_LOWER_CORRECTNESS,
-    ];
-  }
+    /**
+     * Get question options from database.
+     *
+     * @param object $question The question object
+     * @return bool Success status
+     */
+    public function get_question_options($question) {
+        parent::get_question_options($question);
+    }
 
-  public function move_files($questionid, $oldcontextid, $newcontextid) {
-    parent::move_files($questionid, $oldcontextid, $newcontextid);
-    $plugin = $this->plugin_name();
-    $fs = get_file_storage();
-    $fs->move_area_files_to_new_context($oldcontextid, $newcontextid, $plugin, 'graderinfo', $questionid);
-  }
+    /**
+     * Save question options to database.
+     *
+     * @param object $question The question object
+     * @return bool Success status
+     */
+    public function save_question_options($question) {
+        global $DB;
 
-  protected function delete_files($questionid, $contextid) {
-    parent::delete_files($questionid, $contextid);
-    $plugin = $this->plugin_name();
-    $fs = get_file_storage();
-    $fs->delete_area_files($contextid, $plugin, 'graderinfo', $questionid);
-  }
+        $plugin = $this->plugin_name();
+        $plugintable = 'qtype_essaysimilarity_option';
 
-  public function plugin_name() {
-    return 'qtype_essaysimilarity';
-  }
-  
+        $graderinfo = $this->import_or_save_files($question->graderinfo, $question->context, $plugin, 'graderinfo', $question->id);
+        $oldquestion = $DB->get_record($plugintable, ['questionid' => $question->id]);
+
+        $textstatitems = '';
+        if (!empty($question->textstatitems)) {
+            $textstatitems = $question->textstatitems;
+            $textstatitems = array_keys($textstatitems);
+            $textstatitems = implode(',', $textstatitems);
+        }
+
+        $newquestion = (object) [
+        "questionid"              => $question->id,
+        "responseformat"          => $question->responseformat,
+        "responserequired"        => $question->responserequired,
+        "responsefieldlines"      => $question->responsefieldlines,
+        "minwordlimit"            => isset($question->minwordlimit) ? $question->minwordlimit : 0,
+        "maxwordlimit"            => isset($question->maxwordlimit) ? $question->maxwordlimit : 0,
+        "attachments"             => $question->attachments,
+        "attachmentsrequired"     => $question->attachmentsrequired,
+        "maxbytes"                => isset($question->maxbytes) ? $question->maxbytes : 0,
+        "filetypeslist"           => isset($question->filetypeslist) ? $question->filetypeslist : self::EMPTY,
+        "graderinfo"              => $graderinfo,
+        "graderinfoformat"        => $question->graderinfo['format'],
+        "showfeedback"            => $question->showfeedback,
+        "answerkey"               => $question->answerkey['text'],
+        "answerkeyformat"         => $question->answerkey['format'],
+        "showanswerkey"           => $question->showanswerkey,
+        "showtextstats"           => $question->showtextstats,
+        "textstatitems"           => $textstatitems,
+        "responsetemplate"        => isset($question->responsetemplate['text']) ? $question->responsetemplate['text'] : self::EMPTY,
+        "responsetemplateformat"  => isset($question->responsetemplate['format']) ? $question->responsetemplate['format'] : 0,
+        "questionlanguage"        => isset($question->questionlanguage) ? $question->questionlanguage : self::NO_LANG,
+        "upper_correctness"       => $question->upper_correctness ? $question->upper_correctness : self::DEFAULT_UPPER_CORRECTNESS,
+        "lower_correctness"       => $question->lower_correctness ? $question->lower_correctness : self::DEFAULT_LOWER_CORRECTNESS,
+        ];
+
+        if ($oldquestion) {
+            $newquestion->id = $oldquestion->id;
+            $DB->update_record($plugintable, $newquestion);
+        } else {
+            $DB->insert_record($plugintable, $newquestion);
+        }
+    }
+
+    /**
+     * Delete a question from the database.
+     *
+     * @param int $questionid The question ID
+     * @param int $contextid The context ID
+     */
+    public function delete_question($questionid, $contextid) {
+        global $DB;
+
+        $DB->delete_records('qtype_essaysimilarity_option', ['questionid' => $questionid]);
+        parent::delete_question($questionid, $contextid);
+    }
+
+    /**
+     * Initialize a question instance with data from the database.
+     *
+     * @param question_definition $question The question definition object
+     * @param object $questiondata The question data from database
+     */
+    protected function initialise_question_instance(question_definition $question, $questiondata) {
+        parent::initialise_question_instance($question, $questiondata);
+
+        $defaults = self::get_defaults();
+        foreach ($defaults as $name => $default) {
+            $question->$name = isset($questiondata->options->$name) ? $questiondata->options->$name : $default;
+        }
+    }
+
+    /**
+     * Get default values of the question.
+     *
+     * @return array Default values for question options
+     */
+    public static function get_defaults() {
+        return [
+        "responseformat"          => 'editor',
+        "responserequired"        => 1,
+        "responsefieldlines"      => 10,
+        "minwordlimit"            => 0,
+        "maxwordlimit"            => 0,
+        "attachments"             => 0,
+        "attachmentsrequired"     => 0,
+        "maxbytes"                => 0,
+        "filetypeslist"           => self::EMPTY,
+        "graderinfo"              => self::EMPTY,
+        "graderinfoformat"        => 0,
+        "showfeedback"            => self::SHOW_TEACHERS_AND_STUDENTS,
+        "answerkey"               => self::EMPTY,
+        "answerkeyformat"         => 1,
+        "showanswerkey"           => self::SHOW_NONE,
+        "showtextstats"           => self::SHOW_TEACHERS_ONLY,
+        "textstatitems"           => self::EMPTY,
+        "responsetemplate"        => self::EMPTY,
+        "responsetemplateformat"  => 0,
+        "questionlanguage"        => self::NO_LANG,
+        "upper_correctness"       => self::DEFAULT_UPPER_CORRECTNESS,
+        "lower_correctness"       => self::DEFAULT_LOWER_CORRECTNESS,
+        ];
+    }
+
+    /**
+     * Move files from one context to another.
+     *
+     * @param int $questionid The question ID
+     * @param int $oldcontextid The old context ID
+     * @param int $newcontextid The new context ID
+     */
+    public function move_files($questionid, $oldcontextid, $newcontextid) {
+        parent::move_files($questionid, $oldcontextid, $newcontextid);
+        $plugin = $this->plugin_name();
+        $fs = get_file_storage();
+        $fs->move_area_files_to_new_context($oldcontextid, $newcontextid, $plugin, 'graderinfo', $questionid);
+    }
+
+    /**
+     * Delete all files associated with a question.
+     *
+     * @param int $questionid The question ID
+     * @param int $contextid The context ID
+     */
+    protected function delete_files($questionid, $contextid) {
+        parent::delete_files($questionid, $contextid);
+        $plugin = $this->plugin_name();
+        $fs = get_file_storage();
+        $fs->delete_area_files($contextid, $plugin, 'graderinfo', $questionid);
+    }
+
+    /**
+     * Get the plugin name.
+     *
+     * @return string The plugin name
+     */
+    public function plugin_name() {
+        return 'qtype_essaysimilarity';
+    }
 }

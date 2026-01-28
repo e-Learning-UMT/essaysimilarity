@@ -1,28 +1,42 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 global $CFG;
-require_once($CFG->dirroot.'/question/type/essaysimilarity/nlp/stemmer/stemmer.php');
+require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer.php');
 
 class stopword {
-  protected $stopwords = [];
+    protected $stopwords = [];
 
-  public function __construct($lang) {
-    $this->stopwords = require("lang/$lang.php");
-  }
-
-  /**
-   * Remove stop word from token and then stem the token
-   * @param array $token
-   * @param stemmer $stemmer stemmer interface
-   * @return array cleaned token
-   */
-  public function remove_stopword($token, $stemmer) {
-    $token = array_udiff($token, $this->stopwords, 'strcasecmp');
-
-    foreach ($token as &$tok) {
-      $tok = $stemmer->stem($tok);
+    public function __construct($lang) {
+        $this->stopwords = require("lang/$lang.php");
     }
 
-    return $token;
-  }
+    /**
+     * Remove stop word from token and then stem the token
+     * @param array $token
+     * @param stemmer $stemmer stemmer interface
+     * @return array cleaned token
+     */
+    public function remove_stopword($token, $stemmer) {
+        $token = array_udiff($token, $this->stopwords, 'strcasecmp');
+
+        foreach ($token as &$tok) {
+            $tok = $stemmer->stem($tok);
+        }
+
+        return $token;
+    }
 }

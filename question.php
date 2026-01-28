@@ -22,547 +22,631 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined("MOODLE_INTERNAL") || die();
-
-
-// require the parent class
-require_once($CFG->dirroot.'/question/type/essay/question.php');
+// Require the parent class.
+require_once($CFG->dirroot . '/question/type/essay/question.php');
 require_once('nlp/cosine_similarity.php');
 require_once('nlp/tokenizer.php');
 require_once('nlp/transformer/tf_idf.php');
 require_once('nlp/transformer/lsa.php');
 
+/**
+ * Essay similarity question class.
+ *
+ * @package qtype_essaysimilarity
+ * @copyright 2022 Atthoriq Adillah Wicaksana
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class qtype_essaysimilarity_question extends qtype_essay_question implements question_automatically_gradable {
-
-  public function make_behaviour(question_attempt $qa, $preferredbehaviour) {
-    return question_engine::make_archetypal_behaviour($preferredbehaviour, $qa);
-  }
-
-  /**
-   * In situations where is_gradable_response() returns false, this method
-   * should generate a description of what the problem is.
-   * @param array $response
-   * @return string the message.
-   */
-  public function get_validation_error($response) {
-    // check if we have a text answer
-    if (empty($response['answer']) && empty($response['attachments'])) {
-      return get_string('noresponse', 'quiz');
+    /**
+     * Make a behaviour object for this question.
+     *
+     * @param question_attempt $qa the question attempt.
+     * @param string $preferredbehaviour the preferred behaviour.
+     * @return question_behaviour the behaviour object.
+     */
+    public function make_behaviour(question_attempt $qa, $preferredbehaviour) {
+        return question_engine::make_archetypal_behaviour($preferredbehaviour, $qa);
     }
 
-    // ensure we have text response, if required
-    $is_required = $this->responseformat == 'noinline' ? 0 : $this->responserequired; // Ensure we have text response, if it's required
-    if ($is_required && empty($response['answer'])) {
-      return get_string('pleaseinputtext', $this->plugin_name());
+    /**
+     * In situations where is_gradable_response() returns false, this method
+     * should generate a description of what the problem is.
+     * @param array $response
+     * @return string the message.
+     */
+    public function get_validation_error($response) {
+        // Check if we have a text answer.
+        if (empty($response['answer']) && empty($response['attachments'])) {
+            return get_string('noresponse', 'quiz');
+        }
+
+        // Ensure we have text response, if required.
+        $isrequired = $this->responseformat == 'noinline' ? 0 : $this->responserequired;
+        if ($isrequired && empty($response['answer'])) {
+            return get_string('pleaseinputtext', $this->plugin_name());
+        }
+
+        // Check that the answer is not simply the unaltered response template/sample.
+        if ($this->is_same_response($response, $this->responsetemplate)) {
+            return get_string('responseisnotoriginal', $this->plugin_name());
+        }
+
+        // Ensure we have attachments, if required.
+        $attachmentrequired = $this->attachments ? $this->attachmentsrequired : 0;
+        if ($attachmentrequired && empty($response['attachments'])) {
+            return get_string('pleaseattachfiles', $this->plugin_name());
+        }
+
+        // No validation error.
+        return '';
     }
 
-    // check that the answer is not simply the unaltered response template/sample.
-    if ($this->is_same_response($response, $this->responsetemplate)) {
-      return get_string('responseisnotoriginal', $this->plugin_name());
+    /**
+     * Process text stats of the response and then save/update them in database.
+     *
+     * @param string $responsetext the response in plain text
+     * @param bool $nosave whether to skip saving to database
+     * @return object|null text statistics
+     */
+    public function get_and_save_textstats($responsetext, $nosave = false) {
+        global $USER, $DB;
+
+        // Get all text stats and then save to DB according what user choose in form editing.
+        $textstatstable = 'qtype_essaysimilarity_stats';
+        $oldtextstats = $DB->get_record($textstatstable, ['questionid' => $this->id, 'userid' => $USER->id]);
+
+        $stats = $this->get_stats($responsetext);
+        $textstatitems = explode(',', $this->textstatitems);
+        $textstats = (object) [
+            'questionid' => $this->id,
+            'userid' => $USER->id,
+        ];
+        foreach ($textstatitems as $item) {
+            $textstats->$item = $stats->$item;
+        }
+
+        if ($nosave) {
+            return $textstats;
+        }
+
+        if ($oldtextstats) {
+            $textstats->id = $oldtextstats->id;
+            $DB->update_record($textstatstable, $textstats);
+        } else {
+            $DB->insert_record($textstatstable, $textstats);
+        }
+
+        return $textstats;
     }
 
-    // ensure we have attachments, if required
-    $attachment_required = $this->attachments ? $this->attachmentsrequired : 0;
-    if ($attachment_required && empty($response['attachments'])) {
-      return get_string('pleaseattachfiles', $this->plugin_name());
+    /**
+     * Get text statistics without saving to database.
+     *
+     * @param string $responsetext The response text to analyze
+     * @return object Text statistics
+     */
+    public function get_textstats($responsetext) {
+        return $this->get_and_save_textstats($responsetext, true);
     }
 
-    // no validation error
-    return '';
-  }
+    /**
+     * Pre-process the documents.
+     *
+     * @param array $documents Documents that want to be pre-processed
+     * @return array Pre-processed documents
+     */
+    private function preprocess($documents) {
+        $tokenizer = new tokenizer($this->questionlanguage);
 
-  /**
-   * Process text stats of the response and then save/update them in database
-   * @param string $responsetext the response in plain text
-   */
-  public function get_and_save_textstats($responsetext, $nosave = false) {
-    global $USER, $DB;
+        $docs = [];
+        $merged = [];
+        foreach ($documents as $doc) {
+            $tokens = $tokenizer->tokenize(strtolower($doc));
+            $merged = array_merge($merged, $tokens['raw']);
+            $docs[] = $tokens['counted'];
+        }
 
-    // get all text stats and then save to DB according what user choose in form editing
-    $textstats_table = 'qtype_essaysimilarity_stats';
-    $oldtextstats = $DB->get_record($textstats_table, ['questionid' => $this->id, 'userid' => $USER->id]);
+        for ($i = 0; $i < count($docs); $i++) {
+            $docs[$i] = array_replace($merged, $docs[$i]);
+        }
 
-    $stats = $this->get_stats($responsetext);
-    $textstatitems = explode(',', $this->textstatitems);
-    $textstats = (object) [
-      'questionid' => $this->id,
-      'userid' => $USER->id
-    ];
-    foreach ($textstatitems as $item) {
-      $textstats->$item = $stats->$item;
+        $docs = (new tf_idf($docs))->transform();
+        return $docs;
     }
 
-    if ($nosave) return $textstats;
+    /**
+     * Grade a response to the question, returning a fraction between
+     * get_min_fraction() and get_max_fraction(), and the corresponding {@link question_state}
+     * right, partial or wrong.
+     * @param array $response responses, as returned by
+     *      {@link question_attempt_step::get_qt_data()}.
+     * @return array (float, integer) the fraction, and the state.
+     */
+    public function grade_response($response) {
+        $responsetext = $this->to_plaintext($response['answer'], $response['answerformat']);
+        $answerkeytext = $this->to_plaintext($this->answerkey, $this->answerkeyformat);
 
-    if ($oldtextstats) {
-      $textstats->id = $oldtextstats->id;
-      $DB->update_record($textstats_table, $textstats);
-    } else {
-      $DB->insert_record($textstats_table, $textstats);
+        $this->get_and_save_textstats($responsetext);
+
+        $documents = [$answerkeytext, $responsetext];
+        $documents = $this->preprocess($documents);
+        $documents = (new lsa($documents))->transform();
+
+        $cossim = new cosine_similarity();
+        $similarity = $cossim->get_similarity($documents[0], $documents[1]);
+
+        $state = null;
+
+        if ($similarity > $this->upper_correctness) {
+            $state = question_state::$gradedright;
+        } else if ($similarity < $this->lower_correctness) {
+            $state = question_state::$gradedwrong;
+        } else {
+            $state = question_state::$gradedpartial;
+        }
+
+        return [$similarity, $state];
     }
 
-    return $textstats;
-  }
+    /**
+     * Get plagiarism information for the response.
+     *
+     * @param array $response The response data
+     * @return array Plagiarism check results
+     */
+    public function get_plagiarism($response) {
+        global $CFG, $PAGE, $USER;
+        require_once($CFG->dirroot . '/lib/plagiarismlib.php');
 
-  public function get_textstats($responsetext) {
-    return $this->get_and_save_textstats($responsetext, true);
-  }
+        $plagiarism = [];
+        $plagiarismparams = [];
 
-  /*
-   * Pre-process the documents
-   * 
-   * @param array $documents Documents that want to be pre-processed
-   * @param string $lang Language of the documents
-   */
-  private function preprocess($documents) {
-    $tokenizer = new tokenizer($this->questionlanguage);
-    
-    $docs = [];
-    $merged = [];
-    foreach ($documents as $doc) {
-      $tokens = $tokenizer->tokenize(strtolower($doc));
-      $merged = array_merge($merged, $tokens['raw']);
-      $docs[] = $tokens['counted'];
+        if (!$CFG->enableplagiarism) {
+            return $plagiarism;
+        }
+
+        [$context, $course, $cm] = get_context_info_array($PAGE->context->id);
+        $plagiarismparams = [
+        'userid' => $USER->id,
+        'text' => $response,
+        ];
+
+        if ($course) {
+            $plagiarismparams['course'] = $course;
+        }
+
+        if ($cm) {
+            $plagiarismparams['cmid'] = $cm->id;
+            $plagiarismparams[$cm->modname] = $cm->instance;
+        }
+
+        // Get files from response.
+        $files = empty($response) || empty($response['attachments']) ? [] : $response['attachments']->get_files();
+        // Get plagiarism links.
+        $plagiarism[] = plagiarism_get_links($plagiarismparams);
+        foreach ($files as $file) {
+            $plagiarism[] = plagiarism_get_links($plagiarismparams + ['file' => $file]);
+        }
+
+        return $plagiarism;
     }
 
-    for ($i = 0; $i < count($docs); $i++) {
-      $docs[$i] = array_replace($merged, $docs[$i]);
+    /**
+     * Get one of the question hints. The question_attempt is passed in case
+     * the question type wants to do something complex. For example, the
+     * multiple choice with multiple responses question type will turn off most
+     * of the hint options if the student has selected too many opitions.
+     * @param int $hintnumber Which hint to display. Indexed starting from 0
+     * @param question_attempt $qa The question_attempt.
+     * @return null Always returns null as hints are not supported
+     */
+    public function get_hint($hintnumber, question_attempt $qa) {
+        return null; // This plugin does not have hints for multiple tries.
     }
 
-    $docs = (new tf_idf($docs))->transform();
-    return $docs;
-  }
-
-  /**
-   * Grade a response to the question, returning a fraction between
-   * get_min_fraction() and get_max_fraction(), and the corresponding {@link question_state}
-   * right, partial or wrong.
-   * @param array $response responses, as returned by
-   *      {@link question_attempt_step::get_qt_data()}.
-   * @return array (float, integer) the fraction, and the state.
-   */
-  public function grade_response($response) {
-    $responsetext = $this->to_plaintext($response['answer'], $response['answerformat']);
-    $answerkeytext = $this->to_plaintext($this->answerkey, $this->answerkeyformat);
-
-    $this->get_and_save_textstats($responsetext);
-
-    $documents = [$answerkeytext, $responsetext];
-    $documents = $this->preprocess($documents);
-    $documents = (new lsa($documents))->transform();
-    
-    $cossim = new cosine_similarity();
-    $similarity = $cossim->get_similarity($documents[0], $documents[1]);
-
-    $state = null;
-
-    if ($similarity > $this->upper_correctness) {
-      $state = question_state::$gradedright;
-    } else if ($similarity < $this->lower_correctness) {
-      $state = question_state::$gradedwrong;
-    } else {
-      $state = question_state::$gradedpartial;
+    /**
+     * Generate a brief, plain-text, summary of the correct answer to this question.
+     * This is used by various reports, and can also be useful when testing.
+     * This method will return null if such a summary is not possible, or
+     * inappropriate.
+     * @return string|null a plain text summary of the right answer to this question.
+     */
+    public function get_right_answer_summary() {
+        return null; // This plugin does not show the right answer summary.
     }
 
-    return [$similarity, $state];
-  }
+    /**
+     * Parse text from certain format to string
+     * @param string $text Text to be parsed
+     * @param int $format Format of the text
+     * @return string
+     */
+    public function to_plaintext($text, $format) {
+        if (empty($text)) {
+            return '';
+        }
 
-  public function get_plagiarism($response) {
-    global $CFG, $PAGE, $USER;
-    require_once($CFG->dirroot.'/lib/plagiarismlib.php');
+        $plaintext = question_utils::to_plain_text($text, $format, ['para' => false]);
+        $plaintext = $this->standardize_white_space($plaintext);
 
-    $plagiarism = [];
-    $plagiarismparams = [];
-
-    if (!$CFG->enableplagiarism) return $plagiarism;
-
-    [$context, $course, $cm] = get_context_info_array($PAGE->context->id);
-    $plagiarismparams = [
-      'userid' => $USER->id,
-      'text' => $response
-    ];
-
-    if ($course) {
-      $plagiarismparams['course'] = $course;
+        return $plaintext;
     }
 
-    if ($cm) {
-      $plagiarismparams['cmid'] = $cm->id;
-      $plagiarismparams[$cm->modname] = $cm->instance;
+    /**
+     * Standardize white space in $text. Html-entity for non-breaking space, $nbsp;
+     * is converted to a unicode character, "\xc2\xa0", that can be simulated by two ascii chars (194,160)
+     * @param string $text
+     * @return string
+     */
+    private function standardize_white_space($text) {
+        $text = str_replace(chr(194) . chr(160), ' ', $text);
+        $text = preg_replace('/[ \t]+/', ' ', trim($text));
+        $text = preg_replace('/( *[\x0A-\x0D]+ *)+/s', "\n", $text);
+
+        return $text;
     }
 
-    $files = empty($response) || empty($response['attachments']) ? [] : $response['attachments']->get_files();
-    $plagiarism[] = plagiarism_get_links($plagiarismparams);
-    foreach ($files as $file) {
-      $plagiarism[] = plagiarism_get_links($plagiarismparams + ['file' => $file]);
+    /**
+     * Get the plugin name.
+     *
+     * @return string The plugin name
+     */
+    private function plugin_name() {
+        return 'qtype_essaysimilarity';
     }
 
-    return $plagiarism;
-  }
+    /**
+     * Get statistical count of the response
+     * @param string $responsetext
+     */
+    private function get_stats($responsetext) {
+        $precision = 0;
+        $stats = (object) [
+        'chars' => $this->get_stats_chars($responsetext),
+        'words' => $this->get_stats_words($responsetext),
+        'sentences' => $this->get_stats_sentences($responsetext),
+        'paragraphs' => $this->get_stats_paragraphs($responsetext),
+        'longwords' => $this->get_stats_longwords($responsetext),
+        'uniquewords' => $this->get_stats_uniquewords($responsetext),
+        'fogindex' => 0,
+        'lexicaldensity' => 0,
+        'charspersentence' => 0,
+        'wordspersentence' => 0,
+        'longwordspersentence' => 0,
+        'sentencesperparagraph' => 0,
+        ];
 
-  /**
-   * Get one of the question hints. The question_attempt is passed in case
-   * the question type wants to do something complex. For example, the
-   * multiple choice with multiple responses question type will turn off most
-   * of the hint options if the student has selected too many opitions.
-   * @param int $hintnumber Which hint to display. Indexed starting from 0
-   * @param question_attempt $qa The question_attempt.
-   */
-  public function get_hint($hintnumber, question_attempt $qa) {
-    return null; // this plugin does not have hints for multiple tries
-  }
+        if ($stats->words) {
+            $stats->lexicaldensity = round(($stats->uniquewords / $stats->words) * 100, $precision);
+        }
 
-  /**
-   * Generate a brief, plain-text, summary of the correct answer to this question.
-   * This is used by various reports, and can also be useful when testing.
-   * This method will return null if such a summary is not possible, or
-   * inappropriate.
-   * @return string|null a plain text summary of the right answer to this question.
-   */
-  public function get_right_answer_summary() {
-    return null; // this plugin does not show the right answer summary
-  }
+        if ($stats->sentences) {
+            $stats->charspersentence = round($stats->chars / $stats->sentences, $precision);
+            $stats->wordspersentence = round($stats->words / $stats->sentences, $precision);
+            $stats->longwordspersentence = round($stats->longwords / $stats->sentences, $precision);
+        }
 
-  /**
-   * Parse text from certain format to string
-   * @param string $text Text to be parsed
-   * @param int $format Format of the text
-   * @return string
-   */
-  public function to_plaintext($text, $format) {
-    if (empty($text)) return '';
+        if ($stats->wordspersentence) {
+            $stats->fogindex = ($stats->wordspersentence + $stats->longwordspersentence);
+            $stats->fogindex = round($stats->fogindex * 0.4, $precision);
+        }
 
-    $plaintext = question_utils::to_plain_text($text, $format, ['para' => false]);
-    $plaintext = $this->standardize_white_space($plaintext);
+        if ($stats->paragraphs) {
+            $stats->sentencesperparagraph = round($stats->sentences / $stats->paragraphs, $precision);
+        }
 
-    return $plaintext;
-  }
-
-  /**
-   * Standardize white space in $text. Html-entity for non-breaking space, $nbsp;
-   * is converted to a unicode character, "\xc2\xa0", that can be simulated by two ascii chars (194,160)
-   * @param string $text
-   * @return string
-   */
-  private function standardize_white_space($text) {
-    $text = str_replace(chr(194).chr(160), ' ', $text);
-    $text = preg_replace('/[ \t]+/', ' ', trim($text));
-    $text = preg_replace('/( *[\x0A-\x0D]+ *)+/s', "\n", $text);
-
-    return $text;
-  }
-
-  private function plugin_name() {
-    return 'qtype_essaysimilarity';
-  }
-
-  /**
-   * Get statistical count of the response
-   * @param string $responsetext
-   */
-  private function get_stats($responsetext) {
-    $precision = 0;
-    $stats = (object) [
-      'chars' => $this->get_stats_chars($responsetext),
-      'words' => $this->get_stats_words($responsetext),
-      'sentences' => $this->get_stats_sentences($responsetext),
-      'paragraphs' => $this->get_stats_paragraphs($responsetext),
-      'longwords' => $this->get_stats_longwords($responsetext),
-      'uniquewords' => $this->get_stats_uniquewords($responsetext),
-      'fogindex' => 0,
-      'lexicaldensity' => 0,
-      'charspersentence' => 0,
-      'wordspersentence' => 0,
-      'longwordspersentence' => 0,
-      'sentencesperparagraph' => 0
-    ];
-
-    if ($stats->words) {
-      $stats->lexicaldensity = round(($stats->uniquewords / $stats->words) * 100, $precision);
+        return $stats;
     }
 
-    if ($stats->sentences) {
-      $stats->charspersentence = round($stats->chars / $stats->sentences, $precision);
-      $stats->wordspersentence = round($stats->words / $stats->sentences, $precision);
-      $stats->longwordspersentence = round($stats->longwords / $stats->sentences, $precision);
+    /**
+     * Get character count from response text.
+     *
+     * @param string $responsetext The response text
+     * @return int Character count
+     */
+    private function get_stats_chars($responsetext) {
+        return core_text::strlen($responsetext);
     }
 
-    if ($stats->wordspersentence) {
-      $stats->fogindex = ($stats->wordspersentence + $stats->longwordspersentence);
-      $stats->fogindex = round($stats->fogindex * 0.4, $precision);
+    /**
+     * Get word count from response text.
+     *
+     * @param string $responsetext The response text
+     * @return int Word count
+     */
+    private function get_stats_words($responsetext) {
+        return str_word_count($responsetext, 0);
     }
 
-    if ($stats->paragraphs) {
-      $stats->sentencesperparagraph = round($stats->sentences / $stats->paragraphs, $precision);
+    /**
+     * Get sentence count from response text.
+     *
+     * @param string $responsetext The response text
+     * @return int Sentence count
+     */
+    private function get_stats_sentences($responsetext) {
+        $items = preg_split('/[!?.]+(?![0-9])/', $responsetext);
+        return count($items);
     }
 
-    return $stats;
-  }
+    /**
+     * Get paragraph count from response text.
+     *
+     * @param string $responsetext The response text
+     * @return int Paragraph count
+     */
+    private function get_stats_paragraphs($responsetext) {
+        $items = explode("\n", $responsetext);
+        return count($items);
+    }
 
-  private function get_stats_chars($responsetext) {
-    return core_text::strlen($responsetext);
-  }
+    /**
+     * Get unique word count from text.
+     *
+     * @param string $text The text to analyze
+     * @return int Unique word count
+     */
+    private function get_stats_uniquewords($text) {
+        $items = core_text::strtolower($text);
+        $items = str_word_count($items, 1);
+        $items = array_unique($items);
+        return count($items);
+    }
 
-  private function get_stats_words($responsetext) {
-    return str_word_count($responsetext, 0);
-  }
+    /**
+     * Get count of long words (>= 3 syllables) from text.
+     *
+     * @param string $text The text to analyze
+     * @return int Long word count
+     */
+    private function get_stats_longwords($text) {
+        $count = 0;
+        $items = core_text::strtolower($text);
+        $items = str_word_count($items, 1);
+        $items = array_unique($items);
+        foreach ($items as $item) {
+            if ($this->count_syllables($item) > 2) {
+                $count++;
+            }
+        }
+        return $count;
+    }
 
-  private function get_stats_sentences($responsetext) {
-    $items = preg_split('/[!?.]+(?![0-9])/', $responsetext);
-    return count($items);
-  }
+    /**
+     * Count syllables in a word.
+     *
+     * @param string $word The word to analyze
+     * @return int Syllable count
+     */
+    private function count_syllables($word) {
+        // Syllable counting algorithms:
+        // https://github.com/vanderlee/phpSyllable (multilang).
+        // https://github.com/DaveChild/Text-Statistics (English only).
+        // https://pear.php.net/manual/en/package.text.text-statistics.intro.php.
+        // https://pear.php.net/package/Text_Statistics/docs/latest/__filesource/fsource_Text_Statistics__Text_Statistics-1.0.1TextWord.php.html.
 
-  private function get_stats_paragraphs($responsetext) {
-    $items = explode("\n", $responsetext);
-    return count($items);
-  }
+        static $syllablecounts = null;
+        if ($syllablecounts === null) {
+            // Initialize with some well-known problematic words.
+            $syllablecounts = self::get_syllable_counts();
+        }
 
-  private function get_stats_uniquewords($text) {
-    $items = core_text::strtolower($text);
-    $items = str_word_count($items, 1);
-    $items = array_unique($items);
-    return count($items);
-  }
+        $str = strtolower($word);
 
-  private function get_stats_longwords($text) {
-    $count = 0;
-    $items = core_text::strtolower($text);
-    $items = str_word_count($items, 1);
-    $items = array_unique($items);
-    foreach ($items as $item) {
-        if ($this->count_syllables($item) > 2) {
+        // Very short word (1 or 2 chars).
+        if (strlen($str) < 2) {
+            return 1;
+        }
+
+        // If we already know the syllable count, use that.
+        if (array_key_exists($str, $syllablecounts)) {
+            return $syllablecounts[$str];
+        }
+
+        $count = 0;
+
+        // Detect common endings with extra syllable.
+        if (preg_match('/(ia|io|ius|ium)^/', $str)) {
             $count++;
         }
-    }
-    return $count;
-  }
 
-  private function count_syllables($word) {
-    // https://github.com/vanderlee/phpSyllable (multilang)
-    // https://github.com/DaveChild/Text-Statistics (English only)
-    // https://pear.php.net/manual/en/package.text.text-statistics.intro.php
-    // https://pear.php.net/package/Text_Statistics/docs/latest/__filesource/fsource_Text_Statistics__Text_Statistics-1.0.1TextWord.php.html
+        // Detect syllables for double-vowels.
+        $vowelcount = 0;
+        $vowels = [ 'aa', 'ae', 'ai', 'ao', 'au', 'ay',
+                'ea', 'ee', 'ei', 'eo', 'eu', 'ey',
+                'ia', 'ie', 'ii', 'io', 'iu', 'iy',
+                'oa', 'oe', 'oi', 'oo', 'ou', 'oy',
+                'ua', 'ue', 'ui', 'uo', 'uu', 'uy',
+                'ya', 'ye', 'yi', 'yo', 'yu', 'yy' ];
+        $str = str_replace($vowels, '', $str, $vowelcount);
+        $count += $vowelcount;
 
-    static $syllable_counts = null;
-    if ($syllable_counts === null) {
-        // initialize with some well-known problematic words
-        $syllable_counts = self::get_syllable_counts();
-    }
+        // If the last letter is "E", it is often silent.
+        $silentvowel = (substr($str, -1) == 'e');
 
-    $str = strtolower($word);
-
-    // very short word (1 or 2 chars)
-    if (strlen($str) < 2) {
-        return 1;
-    }
-
-    // If we already know the syllable count, use that.
-    if (array_key_exists($str, $syllable_counts)) {
-        return $syllable_counts[$str];
-    }
-
-    $count = 0;
-
-    // Detect common endings with extra syllable.
-    if (preg_match('/(ia|io|ius|ium)^/', $str)) {
-        $count++;
-    }
-
-    // Detect syllables for double-vowels.
-    $vowelcount = 0;
-    $vowels = [ 'aa','ae','ai','ao','au','ay',
-                'ea','ee','ei','eo','eu','ey',
-                'ia','ie','ii','io','iu','iy',
-                'oa','oe','oi','oo','ou','oy',
-                'ua','ue','ui','uo','uu','uy',
-                'ya','ye','yi','yo','yu','yy' ];
-    $str = str_replace($vowels, '', $str, $vowelcount);
-    $count += $vowelcount;
-
-    // If the last letter is "E", it is often silent.
-    $silentvowel = (substr($str, -1) == 'e');
-
-    if ($silentvowel) {
-        $final3chars = substr($str, -3);
-        if (preg_match('/[bcdfgkpstxyz]le/', $final3chars)) {
-            // able, cycle, idle, rifle, angle, ankle, apple, hassle, little, axle, puzzle
-            $silentvowel = false;
-        } else if ($final3chars == 'phe') {
-            // apostrophe, catastrophe
-            $silentvowel = false;
+        if ($silentvowel) {
+            $final3chars = substr($str, -3);
+            if (preg_match('/[bcdfgkpstxyz]le/', $final3chars)) {
+                // Able, cycle, idle, rifle, angle, ankle, apple, hassle, little, axle, puzzle.
+                $silentvowel = false;
+            } else if ($final3chars == 'phe') {
+                // Apostrophe, catastrophe.
+                $silentvowel = false;
+            }
         }
+
+        // Detect syllables for single-vowels.
+        $vowelcount = 0;
+        $vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
+        $str = str_replace($vowels, '', $str, $vowelcount);
+        $count += $vowelcount;
+
+        // Adjust the count for words that end in "e" and have at least one other vowel.
+        if ($count > 1 && $silentvowel) {
+            $count--;
+        }
+
+        $syllablecounts[$str] = $count;
+        return $count;
     }
 
-    // Detect syllables for single-vowels.
-    $vowelcount = 0;
-    $vowels = ['a','e','i','o','u','y'];
-    $str = str_replace($vowels, '', $str, $vowelcount);
-    $count += $vowelcount;
+    /**
+     * Get predefined syllable counts for problematic words.
+     *
+     * @return array Mapping of words to their syllable counts
+     */
+    protected static function get_syllable_counts() {
+        return [
+        // Final "e" as separate syllable.
+        'aborigine' => 5,
+        'adobe' => 3,
+        'anemone' => 4,
+        'cafe' => 2,
+        'chile' => 2,
+        'coyote' => 3,
+        'epitome' => 4,
+        'guacamole' => 4,
+        'hyperbole' => 4,
+        'karate' => 3,
+        'machete' => 3,
+        'maybe' => 2,
+        'recipe' => 3,
+        'sesame' => 3,
+        'simile' => 3,
+        'yosemite' => 4,
 
-    // Adjust the count for words that end in "e"
-    // and have at least one other vowel.
-    if ($count > 1 && $silentvowel) {
-        $count--;
+        // Internal silent-e.
+        'jukebox' => 2,
+        'shoreline' => 2,
+
+        // Double vowel as 2-syllables.
+        'cooperation' => 5,
+        'react' => 2,
+
+        // Internal "ia" as 2-syllables (piano, giant, social, racial, spatial).
+        'piano' => 3,
+        'giant' => 2,
+
+        // Final "ia" as 2-syllables.
+        'Australia' => 4,
+        'California' => 5,
+
+        // Final "io" as 2-syllables.
+        'radio' => 3,
+        'Ohio' => 3,
+
+        // Final "ion" as 2-syllables.
+        'ion' => 2,
+        'lion' => 2,
+        'union' => 3,
+
+        // Final "ius" as 2-syllables.
+        'genius' => 3,
+        'celsius' => 3,
+        'radius' => 3,
+
+        // Final "ium" as 2-syllables (includes Belgium).
+        'aquarium' => 3,
+        'calcium' => 3,
+        'stadium' => 3,
+
+        // Final "eum|oem" as 2-syllables.
+        'museum' => 2,
+        'poem' => 2,
+
+        // Final "che" as 1-syllable.
+        'apache' => 3,
+        'psyche' => 2,
+
+        // final "ble" as 1-syllable
+        'able' => 2,
+        'adaptable' => 4,
+        'incredible' => 4,
+        'syllable' => 3,
+        'table' => 2,
+
+        // final "cle" as 1-syllable
+        'cycle' => 2,
+        'bicycle' => 3,
+        'vehicle' => 3,
+
+        // final "dle" as 1-syllable
+        'handle' => 2,
+        'idle' => 2,
+        'saddle' => 2,
+
+        // final "fle" as 1-syllable
+        'rifle' => 2,
+        'shuffle' => 2,
+
+        // final "gle" as 1-syllable
+        'angle' => 2,
+        'struggle' => 2,
+        'triangle' => 3,
+
+        // final "kle" as 1-syllable
+        'ankle' => 2,
+        'tackle' => 2,
+        'buckle' => 2,
+
+        // final "ple" as 1-syllable
+        'apple' => 2,
+        'example' => 3,
+        'people' => 2,
+
+        // final "sle" as 1-syllable
+        'aisle' => 1,
+        'isle' => 1,
+        'hassle' => 2,
+
+        // final "tle" as 1-syllable
+        'little' => 2,
+        'subtle' => 2,
+        'title' => 2,
+
+        // final "xle" as 1-syllable
+        'axle' => 2,
+
+        // final "yle" as 1-syllable
+        'style' => 1,
+        'styles' => 1,
+
+        // final "zle" as 1-syllable
+        'puzzle' => 2,
+        'drizzle' => 2,
+
+        // final "phe" as 1-syllable
+        'apostrophe' => 4,
+        'catastrophe' => 4,
+
+        // female names
+        'aphrodite' => 4,
+        'ariadne' => 4,
+        'chloe' => 2,
+        'jesse' => 2,
+        'daphne' => 2,
+        'hermione' => 4,
+        'penelope' => 4,
+        'persephone' => 4,
+        'phoebe' => 2,
+        'zoe' => 2,
+
+        // unusual words
+        'abalone' => 4,
+        'abare' => 3,
+        'abed' => 2,
+        'abruzzese' => 4,
+        'abbruzzese' => 4,
+        'acreage' => 3,
+        'adame' => 3,
+        'adieu' => 2,
+        'calliope' => 4,
+        'circe' => 2,
+        'gethsemane' => 4,
+        'syncope' => 3,
+        'tamale' => 3,
+        'eurydice' => 4,
+        'euterpe' => 3,
+        ];
     }
-
-    $syllable_counts[$str] = $count;
-    return $count;
-  }
-
-  static protected function get_syllable_counts() {
-    return [
-      // final "e" as separate syllable
-      'aborigine' => 5,
-      'adobe' => 3,
-      'anemone' => 4,
-      'cafe' => 2,
-      'chile' => 2,
-      'coyote' => 3,
-      'epitome' => 4,
-      'guacamole' => 4,
-      'hyperbole' => 4,
-      'karate' => 3,
-      'machete' => 3,
-      'maybe' => 2,
-      'recipe' => 3,
-      'sesame' => 3,
-      'simile' => 3,
-      'yosemite' => 4,
-
-      // internal silent-e
-      'jukebox' => 2,
-      'shoreline' => 2,
-
-      // double vowel as 2-syllables
-      'cooperation' => 5,
-      'react' => 2,
-
-      // internal "ia" as 2-syllables
-      'piano' => 3,
-      'giant' => 2,
-      // social, racial, spatial
-
-      // final "ia" as 2-syllables
-      'Australia' => 4,
-      'California' => 5,
-
-      // final "io" as 2-syllables
-      'radio' => 3,
-      'Ohio' => 3,
-
-      // final "ion" as 2-syllables
-      'ion' => 2,
-      'lion' => 2,
-      'union' => 3,
-
-      // final "ius" as 2-syllables
-      'genius' => 3,
-      'celsius' => 3,
-      'radius' => 3,
-
-      // final "ium" as 2-syllables
-      'aquarium' => 3,
-      'calcium' => 3,
-      'stadium' => 3,
-      // Belgium
-
-      // final "eum|oem" as 2-syllables
-      'museum' => 2,
-      'poem' => 2,
-
-      // final "che" as 1-syllable
-      'apache' => 3,
-      'psyche' => 2,
-
-      // final "ble" as 1-syllable
-      'able' => 2,
-      'adaptable' => 4,
-      'incredible' => 4,
-      'syllable' => 3,
-      'table' => 2,
-
-      // final "cle" as 1-syllable
-      'cycle' => 2,
-      'bicycle' => 3,
-      'vehicle' => 3,
-
-      // final "dle" as 1-syllable
-      'handle' => 2,
-      'idle' => 2,
-      'saddle' => 2,
-
-      // final "fle" as 1-syllable
-      'rifle' => 2,
-      'shuffle' => 2,
-
-      // final "gle" as 1-syllable
-      'angle' => 2,
-      'struggle' => 2,
-      'triangle' => 3,
-
-      // final "kle" as 1-syllable
-      'ankle' => 2,
-      'tackle' => 2,
-      'buckle' => 2,
-
-      // final "ple" as 1-syllable
-      'apple' => 2,
-      'example' => 3,
-      'people' => 2,
-
-      // final "sle" as 1-syllable
-      'aisle' => 1,
-      'isle' => 1,
-      'hassle' => 2,
-
-      // final "tle" as 1-syllable
-      'little' => 2,
-      'subtle' => 2,
-      'title' => 2,
-
-      // final "xle" as 1-syllable
-      'axle' => 2,
-
-      // final "yle" as 1-syllable
-      'style' => 1,
-      'styles' => 1,
-
-      // final "zle" as 1-syllable
-      'puzzle' => 2,
-      'drizzle' => 2,
-
-      // final "phe" as 1-syllable
-      'apostrophe' => 4,
-      'catastrophe' => 4,
-
-      // female names
-      'aphrodite' => 4,
-      'ariadne' => 4,
-      'chloe' => 2,
-      'jesse' => 2,
-      'daphne' => 2,
-      'hermione' => 4,
-      'penelope' => 4,
-      'persephone' => 4,
-      'phoebe' => 2,
-      'zoe' => 2,
-
-      // unusual words
-      'abalone' => 4,
-      'abare' => 3,
-      'abed' => 2,
-      'abruzzese' => 4,
-      'abbruzzese' => 4,
-      'acreage' => 3,
-      'adame' => 3,
-      'adieu' => 2,
-      'calliope' => 4,
-      'circe' => 2,
-      'gethsemane' => 4,
-      'syncope' => 3,
-      'tamale' => 3,
-      'eurydice' => 4,
-      'euterpe' => 3,
-    ];
-  }
 }

@@ -20,49 +20,37 @@
  * @package    qtype
  * @subpackage essaysimilarity
  * @copyright  2022 Atthoriq Adillah Wicaksana (thoriqadillah59@gmail.com)
- * @copyright  based on work by 2018 Gordon Bateson 
+ * @copyright  based on work by 2018 Gordon Bateson
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['autograding'] = 'Auto-grading';
 $string['answerkey'] = 'Answer key';
+$string['answerkey_help'] = 'Answer key of the question';
+$string['autograding'] = 'Auto-grading';
 
 $string['chars'] = 'Characters';
 $string['charspersentence'] = 'Characters per sentence';
-$string['upper_correctness'] = 'Correctness upper threshold';
-$string['upper_correctness_help'] = 'Upper threshold ranged 0.01 - 0.99 for similarity percentage that will be marked as correct answer (has green color in review page) if the percentage is above this threshold. Leave empty to use default value (0.99)';
-$string['lower_correctness'] = 'Correctness lower threshold';
-$string['lower_correctness_help'] = 'Lower threshold ranged 0.01 - 0.99 for similarity percentage that will be marked as wrong answer (has red color in review page) if the percentage is below this threshold. Leave empty to use default value (0.01)';
-
 $string['datetime'] = '{$a->datetime}';
-
 $string['explanationdatetime'] = '%d %b %Y at %H:%M';
 $string['explanationoverride'] = 'The grade for this essay was manually set to {$a->manualgrade}.';
-
-$string['fogindex'] = 'Fog index';
-$string['fogindex_help'] = 'The Gunning fog index is a measure of readability that aims to determine the level of text difficulty, or how easy a text is to read';
 $string['feedback'] = 'The similarity between answer and the answer key is {$a}. This is automatic grading. The grade may be overriden by the teacher or accepted as is';
 $string['feedbacksection'] = 'Feedback';
-
+$string['fogindex'] = 'Fog index';
+$string['fogindex_help'] = 'The Gunning fog index is a measure of readability that aims to determine the level of text difficulty, or how easy a text is to read';
 $string['grading'] = 'Grading';
-
-$string['answerkey'] = 'Answer key';
-$string['answerkey_help'] = 'Answer key of the question';
-
+$string['language_en'] = 'English';
+$string['language_id'] = 'Indonesia';
+$string['language_none'] = 'None';
 $string['lexicaldensity'] = 'Lexical density';
 $string['lexicaldensity_help'] = 'The lexical density is a percentage that measures the structure and complexity of human communication in a language';
 $string['longwords'] = 'Long words';
 $string['longwordspersentence'] = 'Long words per sentence';
-$string['language_none'] = 'None';
-$string['language_en'] = 'English';
-$string['language_id'] = 'Indonesia';
-
+$string['lower_correctness'] = 'Correctness lower threshold';
+$string['lower_correctness_help'] = 'Lower threshold ranged 0.01 - 0.99 for similarity percentage that will be marked as wrong answer (has red color in review page) if the percentage is below this threshold. Leave empty to use default value (0.01)';
 $string['maximumfilecount'] = 'Maximum number of files: {$a}';
 $string['maximumfilesize'] = 'Maximum file size: {$a}';
 $string['minimumfilecount'] = 'Minimum number of files: {$a}';
-
 $string['no'] = 'No';
-
 $string['paragraphs'] = 'Paragraphs';
 $string['plagiarismcheck'] = 'Plagiarism check';
 $string['pleaseattachfiles'] = 'Please attach the required number of files.';
@@ -74,15 +62,12 @@ $string['pluginnameadding'] = 'Adding an essay similarity question';
 $string['pluginnameediting'] = 'Editing an essay similarity question';
 $string['pluginnamesummary'] = 'Allows an essay as a question response that will be graded automatically by comparing the similarity between the response and teacher answer key. The grade may be overridden later.';
 $string['privacy:metadata'] = 'The essay similarity question type plugin does not store any personal data.';
-
 $string['questionlanguage'] = 'Question language';
 $string['questionlanguage_help'] = 'Specify the question language for pre-processing purpose to increase the accuracy of the auto grading. If your language does not listed here, select none. See the following link to know how to add your language';
 $string['questionlanguage_link'] = 'https://github.com/thoriqadillah/essaysimilarity#add-your-language';
-
-$string['responseisnotoriginal'] = 'Please provide your own answer';
-$string['requiredfilecount'] = 'Required number of files: {$a}';
 $string['requiredanswerkey'] = 'Answer key is required';
-
+$string['requiredfilecount'] = 'Required number of files: {$a}';
+$string['responseisnotoriginal'] = 'Please provide your own answer';
 $string['sentences'] = 'Sentences';
 $string['sentencesperparagraph'] = 'Sentences per paragraph';
 $string['showanswerkey'] = 'Show answer key?';
@@ -92,14 +77,29 @@ $string['showfeedback_help'] = 'If this option is enabled, a feedback will be sh
 $string['showtextstats'] = 'Show text statistics?';
 $string['showtextstats_help'] = 'If this option is enabled, statistics about the text will be shown on the grading and review page.';
 $string['showtostudentsonly'] = 'Only show to students';
-$string['showtoteachersonly'] = 'Only show to teachers';
 $string['showtoteachersandstudents'] = 'Show to teachers and students';
-
+$string['showtoteachersonly'] = 'Only show to teachers';
+$string['textstatistics'] = 'Text statistics';
 $string['textstatitems'] = 'Statistical items';
 $string['textstatitems_help'] = 'Select any items here that you wish to appear in the text statistics that are shown on grading and review pages.';
-$string['textstatistics'] = 'Text statistics';
-
 $string['uniquewords'] = 'Unique words';
+$string['upper_correctness'] = 'Correctness upper threshold';
+$string['upper_correctness_help'] = 'Upper threshold ranged 0.01 - 0.99 for similarity percentage that will be marked as correct answer (has green color in review page) if the percentage is above this threshold. Leave empty to use default value (0.99)';
+
+
+
+
+
+$string['answerkey'] = 'Answer key';
+
+
+
+
+
+
+
+
+
 
 $string['words'] = 'Words';
 $string['wordspersentence'] = 'Words per sentence';

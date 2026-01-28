@@ -1,5 +1,11 @@
 # Essay Similarity
 Is a moodle question type plugin that compares the similarity between student's answer and teacher's answer key using machine learning (natural language processing), and uses the similarity to auto grade the answer. The automatic grade can be manually overridden by the teacher
+
+## Compatibility
+- **Moodle 5.1+** (also compatible with Moodle 4.1 LTS, 4.3, 4.4, 5.0)
+- **PHP 8.1, 8.2, 8.3**
+- Supports PostgreSQL and MariaDB/MySQL
+
 ## Previews
 ![preview1](pix/preview1.png)
 ![preview2](pix/preview2.png)
@@ -74,6 +80,35 @@ class LANG_CODE_stemmer implements stemmer { // change the LANG_CODE with ISO 63
 2. (Optional) translate the entire language string of this plugin. People from the same country of yours may use this plugin and they use the translation. But may be they not. We never know :)
 
 Finally, you can submit your code as contribution to this plugin so people can make use of your code :)
+
+## Testing
+
+This plugin includes comprehensive PHPUnit tests and GitHub Actions CI/CD.
+
+### Quick Test
+```bash
+cd question/type/essaysimilarity
+./test_plugin.sh all
+```
+
+For detailed testing instructions, see [TESTING.md](TESTING.md).
+
+### Continuous Integration
+The plugin automatically runs tests on:
+- Multiple Moodle versions (4.1 LTS through 5.1)
+- Multiple PHP versions (8.0, 8.1, 8.2, 8.3)
+- Both PostgreSQL and MariaDB databases
+
+## Development
+
+### Running Tests Locally
+Before committing changes:
+1. Run `./test_plugin.sh phplint` - Check PHP syntax
+2. Run `./test_plugin.sh validate` - Validate plugin structure
+3. Run `./test_plugin.sh init-phpunit` - Initialize PHPUnit (first time)
+4. Run `./test_plugin.sh phpunit` - Run unit tests
+
+See [TESTING.md](TESTING.md) for comprehensive testing documentation.
 
 ## License
 [GPL v3](https://github.com/thoriqadillah/essaysimilarity/blob/main/LICENSE)
