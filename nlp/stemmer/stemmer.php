@@ -14,11 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-interface stemmer {
+/**
+ * Stemmer interface.
+ *
+ * @package    qtype_essaysimilarity
+ * @copyright  2026 Atthoriq Adillah Wicaksana
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+require_once(__DIR__ . '/../cleaner/cleaner.php');
+
+/**
+ * Stemmer interface extending cleaner.
+ */
+interface stemmer extends cleaner {
     /**
-     * Stem word to its root
-     * @param string $word
-     * @return string root of the word
+     * Stem word to its root.
+     *
+     * @param string $word Word to stem
+     * @return string Root of the word
      */
     public function stem($word);
 }

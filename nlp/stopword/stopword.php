@@ -14,21 +14,51 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-global $CFG;
-require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer.php');
+/**
+ * Stopword removal class.
+ *
+ * @package    qtype_essaysimilarity
+ * @copyright  2026 Atthoriq Adillah Wicaksana
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-class stopword {
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/cleaner/cleaner.php');
+
+/**
+ * Stopword removal class implementing cleaner interface.
+ */
+class stopword implements cleaner {
+    /** @var array Stopwords list */
     protected $stopwords = [];
 
+    /**
+     * Constructor.
+     *
+     * @param string $lang Language code
+     */
     public function __construct($lang) {
         $this->stopwords = require("lang/$lang.php");
     }
 
     /**
-     * Remove stop word from token and then stem the token
-     * @param array $token
-     * @param stemmer $stemmer stemmer interface
-     * @return array cleaned token
+     * Clean tokens by removing stopwords.
+     *
+     * @param array $token Tokens to clean
+     * @return array Cleaned tokens
+     */
+    public function clean(array $token): array {
+        return array_udiff($token, $this->stopwords, 'strcasecmp');
+    }
+
+    /**
+     * Remove stop word from token and then stem the token.
+     *
+     * @param array $token Tokens
+     * @param stemmer $stemmer Stemmer interface
+     * @return array Cleaned token
      */
     public function remove_stopword($token, $stemmer) {
         $token = array_udiff($token, $this->stopwords, 'strcasecmp');

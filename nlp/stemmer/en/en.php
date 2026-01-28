@@ -39,6 +39,20 @@ class en_stemmer implements stemmer {
     ];
 
     /**
+     * Clean tokens by stemming each word.
+     *
+     * @param array $token Tokens to clean
+     * @return array Cleaned tokens
+     */
+    public function clean(array $token): array {
+        $cleaned = [];
+        foreach ($token as $word) {
+            $cleaned[] = $this->stem($word);
+        }
+        return $cleaned;
+    }
+
+    /**
      * Quoting from the original C implementation.
      *
      *    > The main part of the stemming algorithm starts here. b is a buffer

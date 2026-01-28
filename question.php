@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 // Require the parent class.
 require_once($CFG->dirroot . '/question/type/essay/question.php');
 require_once('nlp/stopword/stopword.php');
@@ -151,7 +153,7 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
             }
 
             $raw = array_flip($token);
-            $raw = array_map(function() {
+            $raw = array_map(function () {
                 return 0;
             }, $raw);
 

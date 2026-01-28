@@ -29,7 +29,21 @@ class id_stemmer implements stemmer {
     }
 
     /**
-     * Cek apakah suatu kata sudah termasuk ke dalam kata dasar
+     * Clean tokens by stemming each word.
+     *
+     * @param array $token Tokens to clean
+     * @return array Cleaned tokens
+     */
+    public function clean(array $token): array {
+        $cleaned = [];
+        foreach ($token as $word) {
+            $cleaned[] = $this->stem($word);
+        }
+        return $cleaned;
+    }
+
+    /**
+     * Cek apakah suatu kata sudah termasuk ke dalam kata dasar.
      */
     private function cek_kamus($kata) {
         return in_array($kata, $this->kamus);
