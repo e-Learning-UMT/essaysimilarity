@@ -20,6 +20,7 @@ class en_whitespace_vectorizer implements vectorizer {
    * Normalize the string from special characters and symbols
    */
   protected function normalize(string $str): string {
+    $str = mb_strtolower($str, 'UTF-8');
     $str = preg_replace('/[^a-z -]/im', ' ', $str);
     $str = preg_replace('/( +)/im', ' ', $str);
     $str = str_replace('- ', '', $str);

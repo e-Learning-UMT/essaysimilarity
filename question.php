@@ -72,7 +72,7 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
         }
 
         // Check that the answer is not simply the unaltered response template/sample.
-        if ($this->is_same_response($response, $this->responsetemplate)) {
+        if ($this->is_same_response($response, ['answer' => $this->responsetemplate])) {
             return get_string('responseisnotoriginal', $this->plugin_name());
         }
 
@@ -332,7 +332,7 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
      *
      * @return string The plugin name
      */
-    private function plugin_name() {
+    public function plugin_name() {
         return 'qtype_essaysimilarity';
     }
 
@@ -340,7 +340,7 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
      * Get statistical count of the response
      * @param string $responsetext
      */
-    private function get_stats($responsetext) {
+    public function get_stats($responsetext) {
         $precision = 0;
         $stats = (object) [
         'chars' => $this->get_stats_chars($responsetext),

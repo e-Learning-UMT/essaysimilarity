@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/cosine_similari
  *
  * @copyright  2026 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers     \CosineSimilarity
+ * @covers     \cosine_similarity
  */
 final class cosine_similarity_test extends \advanced_testcase {
     /**
@@ -49,12 +49,12 @@ final class cosine_similarity_test extends \advanced_testcase {
      * Test cosine similarity with identical vectors.
      */
     public function test_identical_vectors(): void {
-        $cosinesim = new \CosineSimilarity();
+        $cosinesim = new \cosine_similarity();
 
         $vector1 = [1, 2, 3, 4, 5];
         $vector2 = [1, 2, 3, 4, 5];
 
-        $similarity = $cosinesim->calculate($vector1, $vector2);
+        $similarity = $cosinesim->get_similarity($vector1, $vector2);
 
         // Identical vectors should have similarity of 1.0.
         $this->assertEquals(1.0, $similarity, '', 0.0001);
@@ -64,12 +64,12 @@ final class cosine_similarity_test extends \advanced_testcase {
      * Test cosine similarity with orthogonal vectors.
      */
     public function test_orthogonal_vectors(): void {
-        $cosinesim = new \CosineSimilarity();
+        $cosinesim = new \cosine_similarity();
 
         $vector1 = [1, 0, 0];
         $vector2 = [0, 1, 0];
 
-        $similarity = $cosinesim->calculate($vector1, $vector2);
+        $similarity = $cosinesim->get_similarity($vector1, $vector2);
 
         // Orthogonal vectors should have similarity of 0.0.
         $this->assertEquals(0.0, $similarity, '', 0.0001);
@@ -79,12 +79,12 @@ final class cosine_similarity_test extends \advanced_testcase {
      * Test cosine similarity with opposite vectors.
      */
     public function test_opposite_vectors(): void {
-        $cosinesim = new \CosineSimilarity();
+        $cosinesim = new \cosine_similarity();
 
         $vector1 = [1, 2, 3];
         $vector2 = [-1, -2, -3];
 
-        $similarity = $cosinesim->calculate($vector1, $vector2);
+        $similarity = $cosinesim->get_similarity($vector1, $vector2);
 
         // Opposite vectors should have similarity of -1.0.
         $this->assertEquals(-1.0, $similarity, '', 0.0001);
@@ -94,12 +94,12 @@ final class cosine_similarity_test extends \advanced_testcase {
      * Test cosine similarity with similar vectors.
      */
     public function test_similar_vectors(): void {
-        $cosinesim = new \CosineSimilarity();
+        $cosinesim = new \cosine_similarity();
 
         $vector1 = [1, 2, 3, 4];
         $vector2 = [1, 2, 3, 5];
 
-        $similarity = $cosinesim->calculate($vector1, $vector2);
+        $similarity = $cosinesim->get_similarity($vector1, $vector2);
 
         // Similar vectors should have high similarity.
         $this->assertGreaterThan(0.9, $similarity);
@@ -110,12 +110,12 @@ final class cosine_similarity_test extends \advanced_testcase {
      * Test cosine similarity with zero vectors.
      */
     public function test_zero_vectors(): void {
-        $cosinesim = new \CosineSimilarity();
+        $cosinesim = new \cosine_similarity();
 
         $vector1 = [0, 0, 0];
         $vector2 = [1, 2, 3];
 
-        $similarity = $cosinesim->calculate($vector1, $vector2);
+        $similarity = $cosinesim->get_similarity($vector1, $vector2);
 
         // Zero vector should return 0.
         $this->assertEquals(0.0, $similarity);
@@ -125,7 +125,7 @@ final class cosine_similarity_test extends \advanced_testcase {
      * Test cosine similarity with different length vectors.
      */
     public function test_different_length_vectors(): void {
-        $cosinesim = new \CosineSimilarity();
+        $cosinesim = new \cosine_similarity();
 
         $vector1 = [1, 2, 3];
         $vector2 = [1, 2];
@@ -133,7 +133,7 @@ final class cosine_similarity_test extends \advanced_testcase {
         // Should handle gracefully or throw exception.
         // Depending on implementation.
         try {
-            $similarity = $cosinesim->calculate($vector1, $vector2);
+            $similarity = $cosinesim->get_similarity($vector1, $vector2);
             $this->assertIsFloat($similarity);
         } catch (\Exception $e) {
             // Exception is acceptable for mismatched vectors.

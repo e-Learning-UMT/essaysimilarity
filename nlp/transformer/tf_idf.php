@@ -22,7 +22,7 @@ class tf_idf {
     private $documents = [];
     private $idf = [];
 
-    public function __construct($documents) {
+    public function __construct($documents = []) {
         $this->documents = $documents;
         if (count($this->documents) > 0) {
             $this->fit();
@@ -50,7 +50,14 @@ class tf_idf {
         }
     }
 
-    public function transform() {
+    public function transform($matrix = null) {
+        if ($matrix !== null) {
+            $this->documents = $matrix->get();
+            if (count($this->documents) > 0 && empty($this->idf)) {
+                $this->fit();
+            }
+        }
+
         foreach ($this->documents as &$document) {
             foreach ($document as $index => &$feature) {
                 $feature *= $this->idf[$index];
