@@ -15,10 +15,23 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Cosine Similarity Implementaion
- * Credit to @angeloskath, copied from https://github.com/angeloskath/php-nlp-tools/blob/master/src/NlpTools/Similarity/CosineSimilarity.php
+ * Cosine similarity implementation for comparing document vectors.
+ *
+ * Credit to @angeloskath, adapted from
+ * https://github.com/angeloskath/php-nlp-tools/blob/master/src/NlpTools/Similarity/CosineSimilarity.php
+ *
+ * @package    qtype_essaysimilarity
+ * @copyright  2024 Thoriq Adillah
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cosine_similarity {
+    /**
+     * Calculate dot product of two vectors.
+     *
+     * @param array $v1 First vector
+     * @param array $v2 Second vector
+     * @return float Dot product
+     */
     private function product($v1, $v2) {
         $prod = 0.0;
         foreach ($v1 as $i => $xi) {
@@ -28,6 +41,12 @@ class cosine_similarity {
         return $prod;
     }
 
+    /**
+     * Calculate magnitude of a vector.
+     *
+     * @param array $vect Input vector
+     * @return float Magnitude
+     */
     private function magintude($vect): float {
         $magnitude = 0.0;
         foreach ($vect as $v) {
@@ -37,6 +56,13 @@ class cosine_similarity {
         return sqrt($magnitude);
     }
 
+    /**
+     * Calculate cosine similarity between two vectors.
+     *
+     * @param array $v1 First vector
+     * @param array $v2 Second vector
+     * @return float Similarity score (0-1)
+     */
     public function get_similarity($v1, $v2) {
         $dot = $this->product($v1, $v2);
         $magnitude = $this->magintude($v1) * $this->magintude($v2);
@@ -44,3 +70,4 @@ class cosine_similarity {
         return $magnitude == 0 ? 0 : $dot / $magnitude;
     }
 }
+

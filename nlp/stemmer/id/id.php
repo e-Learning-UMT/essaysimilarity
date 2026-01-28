@@ -14,16 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+/**
+ * Indonesian (Bahasa Indonesia) stemmer using Nazief and Adriani algorithm.
+ *
+ * Credit to @ilhamdp10, adapted from
+ * https://github.com/ilhamdp10/algoritma-stemming-nazief-adriani/blob/master/enhanced_CS.php
+ *
+ * @package    qtype_essaysimilarity
+ * @copyright  2024 Thoriq Adillah
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer.php');
 
 /**
- * Stemming bahasa indonesia menggunakan algoritma Nazief dan Adriani
- * Credit to @ilhamdp10, copied and modified from https://github.com/ilhamdp10/algoritma-stemming-nazief-adriani/blob/master/enhanced_CS.php
+ * Indonesian stemmer class implementing Nazief-Adriani algorithm.
  */
 class id_stemmer implements stemmer {
+    /**
+     * @var array Dictionary of root words.
+     */
     private $kamus;
 
+    /**
+     * Constructor - loads dictionary.
+     */
     public function __construct() {
         $this->kamus = require('dictionary.php');
     }

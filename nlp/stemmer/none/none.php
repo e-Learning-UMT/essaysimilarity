@@ -31,7 +31,6 @@ require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer
  * None stemmer class - returns words unchanged.
  */
 class none_stemmer implements stemmer {
-
     /**
      * Clean tokens (no stemming).
      *

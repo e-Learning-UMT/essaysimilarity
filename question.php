@@ -599,68 +599,68 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
         'apache' => 3,
         'psyche' => 2,
 
-        // final "ble" as 1-syllable
+        // Final "ble" as 1-syllable.
         'able' => 2,
         'adaptable' => 4,
         'incredible' => 4,
         'syllable' => 3,
         'table' => 2,
 
-        // final "cle" as 1-syllable
+        // Final "cle" as 1-syllable.
         'cycle' => 2,
         'bicycle' => 3,
         'vehicle' => 3,
 
-        // final "dle" as 1-syllable
+        // Final "dle" as 1-syllable.
         'handle' => 2,
         'idle' => 2,
         'saddle' => 2,
 
-        // final "fle" as 1-syllable
+        // Final "fle" as 1-syllable.
         'rifle' => 2,
         'shuffle' => 2,
 
-        // final "gle" as 1-syllable
+        // Final "gle" as 1-syllable.
         'angle' => 2,
         'struggle' => 2,
         'triangle' => 3,
 
-        // final "kle" as 1-syllable
+        // Final "kle" as 1-syllable.
         'ankle' => 2,
         'tackle' => 2,
         'buckle' => 2,
 
-        // final "ple" as 1-syllable
+        // Final "ple" as 1-syllable.
         'apple' => 2,
         'example' => 3,
         'people' => 2,
 
-        // final "sle" as 1-syllable
+        // Final "sle" as 1-syllable.
         'aisle' => 1,
         'isle' => 1,
         'hassle' => 2,
 
-        // final "tle" as 1-syllable
+        // Final "tle" as 1-syllable.
         'little' => 2,
         'subtle' => 2,
         'title' => 2,
 
-        // final "xle" as 1-syllable
+        // Final "xle" as 1-syllable.
         'axle' => 2,
 
-        // final "yle" as 1-syllable
+        // Final "yle" as 1-syllable.
         'style' => 1,
         'styles' => 1,
 
-        // final "zle" as 1-syllable
+        // Final "zle" as 1-syllable.
         'puzzle' => 2,
         'drizzle' => 2,
 
-        // final "phe" as 1-syllable
+        // Final "phe" as 1-syllable.
         'apostrophe' => 4,
         'catastrophe' => 4,
 
-        // female names
+        // Female names.
         'aphrodite' => 4,
         'ariadne' => 4,
         'chloe' => 2,
@@ -672,7 +672,7 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
         'phoebe' => 2,
         'zoe' => 2,
 
-        // unusual words
+        // Unusual words.
         'abalone' => 4,
         'abare' => 3,
         'abed' => 2,

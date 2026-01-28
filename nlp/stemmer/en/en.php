@@ -14,15 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-global $CFG;
-require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer.php');
 /**
+ * Porter stemming algorithm implementation for English.
+ *
  * Copyright 2013 Katharopoulos Angelos <katharas@gmail.com>
  *
  * This class implements the Porter stemming algorithm. It is almost a
  * one to one conversion from Porter's ANSI C implementation and can
  * thus be regarded as canonical as the C implementation found at
  * http://www.tartarus.org/~martin/PorterStemmer
+ *
+ * @package    qtype_essaysimilarity
+ * @copyright  2024 Thoriq Adillah
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer.php');
  *
  * The rewrite instead of using Richard Heyes's implementation has
  * been to improve performance.
