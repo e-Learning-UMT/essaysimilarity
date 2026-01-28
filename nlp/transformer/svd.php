@@ -54,7 +54,15 @@ class svd {
      */
     private $matrix = [];
 
-    private $m, $n;
+    /**
+     * @var int Number of rows.
+     */
+    private $m;
+
+    /**
+     * @var int Number of columns.
+     */
+    private $n;
 
     /**
      * Perform SVD
