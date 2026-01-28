@@ -24,10 +24,13 @@
 
 // Require the parent class.
 require_once($CFG->dirroot . '/question/type/essay/question.php');
+require_once('nlp/stopword/stopword.php');
+require_once('nlp/stemmer/factory.php');
+require_once('nlp/vectorizer/whitespace_vectorizer/whitespace_vectorizer.php');
 require_once('nlp/cosine_similarity.php');
-require_once('nlp/tokenizer.php');
+require_once('nlp/transformer/matrix.php');
 require_once('nlp/transformer/tf_idf.php');
-require_once('nlp/transformer/lsa.php');
+require_once('nlp/transformer/svd.php');
 
 /**
  * Essay similarity question class.
@@ -133,24 +136,52 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
      * Pre-process the documents.
      *
      * @param array $documents Documents that want to be pre-processed
+     * @param vectorizer $vectorizer Vectorizer to tokenize documents
+     * @param mixed ...$cleaners Cleaners to clean the tokens (e.g., stopword, stemmer)
      * @return array Pre-processed documents
      */
-    private function preprocess($documents) {
-        $tokenizer = new tokenizer($this->questionlanguage);
-
+    private function preprocess(array $documents, vectorizer $vectorizer, ...$cleaners) {
         $docs = [];
         $merged = [];
         foreach ($documents as $doc) {
-            $tokens = $tokenizer->tokenize(strtolower($doc));
-            $merged = array_merge($merged, $tokens['raw']);
-            $docs[] = $tokens['counted'];
+            // We assume that stemmer implementation and stopword dictionary for certain language is present.
+            $token = $vectorizer->vectorize($doc);
+            foreach ($cleaners as $cleaner) {
+                $token = $cleaner->clean($token);
+            }
+
+            $raw = array_flip($token);
+            $raw = array_map(function() {
+                return 0;
+            }, $raw);
+
+            $merged = array_merge($merged, $raw);
+            $docs[] = array_count_values($token);
         }
 
         for ($i = 0; $i < count($docs); $i++) {
             $docs[$i] = array_replace($merged, $docs[$i]);
         }
 
-        $docs = (new tf_idf($docs))->transform();
+        return $docs;
+    }
+
+    /**
+     * Transform documents using transformers.
+     *
+     * @param array $documents Documents to transform
+     * @param mixed ...$transformers Transformers to apply
+     * @return array Transformed documents
+     */
+    private function transform($documents, ...$transformers) {
+        $docs = $documents;
+        $matrix = new matrix($docs);
+
+        foreach ($transformers as $transformer) {
+            $docs = $transformer->transform($matrix);
+            $matrix->set($docs);
+        }
+
         return $docs;
     }
 
@@ -163,14 +194,22 @@ class qtype_essaysimilarity_question extends qtype_essay_question implements que
      * @return array (float, integer) the fraction, and the state.
      */
     public function grade_response($response) {
+        $lang = clean_param($this->questionlanguage, PARAM_ALPHA);
+
         $responsetext = $this->to_plaintext($response['answer'], $response['answerformat']);
         $answerkeytext = $this->to_plaintext($this->answerkey, $this->answerkeyformat);
+        $documents = [$answerkeytext, $responsetext];
 
         $this->get_and_save_textstats($responsetext);
 
-        $documents = [$answerkeytext, $responsetext];
-        $documents = $this->preprocess($documents);
-        $documents = (new lsa($documents))->transform();
+        $documents = $this->preprocess(
+            $documents,
+            whitespace_vectorizer::create($lang),
+            new stopword($lang),
+            stemmer_factory::create($lang)
+        );
+
+        $documents = $this->transform($documents, new tf_idf(), new svd());
 
         $cossim = new cosine_similarity();
         $similarity = $cossim->get_similarity($documents[0], $documents[1]);
