@@ -98,9 +98,9 @@ class matrix {
             throw new InvalidArgumentException("Column A ($colsa) and Row B ($rowsb) is not equal");
         }
 
-        foreach ($matrixa as $i => $) {
-            foreach ($matrixb[0] as $j => $) {
-                foreach ($matrixa[0] as $p => $) {
+        foreach ($matrixa as $i => $row) {
+            foreach ($matrixb[0] as $j => $col) {
+                foreach ($matrixa[0] as $p => $key) {
                     $product[$i][$j] += $matrixa[$i][$p] * $matrixb[$p][$j];
                 }
             }

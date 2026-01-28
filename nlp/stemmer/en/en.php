@@ -33,6 +33,9 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer.php');
+
+/**
+ * English Porter Stemmer implementation.
  *
  * The rewrite instead of using Richard Heyes's implementation has
  * been to improve performance.
