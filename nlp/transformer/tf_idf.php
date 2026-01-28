@@ -15,13 +15,31 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * TF-IDF implementation with some modification
- * Credit to @jorgecasas from his PHP-ML library. Copied from https://github.com/jorgecasas/php-ml/blob/develop/src/FeatureExtraction/TfIdfTransformer.php
+ * TF-IDF implementation with some modification.
+ *
+ * Credit to @jorgecasas from his PHP-ML library.
+ * Copied from https://github.com/jorgecasas/php-ml/blob/develop/src/FeatureExtraction/TfIdfTransformer.php
+ *
+ * @package    qtype_essaysimilarity
+ * @copyright  2024 Thoriq Adillah
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tf_idf {
+    /**
+     * @var array Document collection.
+     */
     private $documents = [];
+
+    /**
+     * @var array Inverse document frequency values.
+     */
     private $idf = [];
 
+    /**
+     * Constructor.
+     *
+     * @param array $documents Document collection
+     */
     public function __construct($documents = []) {
         $this->documents = $documents;
         if (count($this->documents) > 0) {
@@ -29,6 +47,9 @@ class tf_idf {
         }
     }
 
+    /**
+     * Count inverse document frequency.
+     */
     private function count_idf() {
         $this->idf = array_fill_keys(array_keys($this->documents[0]), 0);
 
@@ -41,15 +62,24 @@ class tf_idf {
         }
     }
 
+    /**
+     * Fit the transformer to the documents.
+     */
     public function fit() {
         $this->count_idf();
 
-        $n_docs = count($this->documents);
+        $ndocs = count($this->documents);
         foreach ($this->idf as &$value) {
-            $value = 1 + log((float) (($n_docs + 1) / ($value + 1)), 10.0); // idf with smoothing to avoid division by zero
+            $value = 1 + log((float) (($ndocs + 1) / ($value + 1)), 10.0); // idf with smoothing to avoid division by zero
         }
     }
 
+    /**
+     * Transform documents using TF-IDF.
+     *
+     * @param matrix|null $matrix Optional matrix to transform
+     * @return array Transformed documents
+     */
     public function transform($matrix = null) {
         if ($matrix !== null) {
             $this->documents = $matrix->get();

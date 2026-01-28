@@ -14,26 +14,39 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+/**
+ * Singular Value Decomposition (SVD) implementation.
+ *
+ * @package    qtype_essaysimilarity
+ * @copyright  2024 Thoriq Adillah
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
 require_once('matrix.php');
 
+/**
+ * SVD class for matrix decomposition.
+ */
 class svd {
     /**
      * Left singular vector
      * @var array
      */
-    private $U  = [];
+    private $u  = [];
 
     /**
      * One-dimensional array of singular vector
      * @var array
      */
-    private $Sv  = [];
+    private $sv  = [];
 
     /**
      * Right singular vector
      * @var array
      */
-    private $V  = [];
+    private $v  = [];
 
     /**
      * Matrix that being passed
@@ -67,11 +80,11 @@ class svd {
         $nu = min($m, $n);
 
         // Copy matrix to A
-        $A = $this->matrix->get();
+        $a = $this->matrix->get();
 
         $s = array_fill(0, min($m + 1, $n), 0);
-        $U = array_fill(0, $m, array_fill(0, $nu, 0));
-        $V = array_fill(0, $n, array_fill(0, $n, 0));
+        $u = array_fill(0, $m, array_fill(0, $nu, 0));
+        $v = array_fill(0, $n, array_fill(0, $n, 0));
         $e = array_fill(0, $n, 0);
         $work = array_fill(0, $m, 0);
 
@@ -90,17 +103,17 @@ class svd {
                 // Compute 2-norm of k-th column without under/overflow.
                 $s[$k] = 0;
                 for ($i = $k; $i < $m; $i++) {
-                    $s[$k] = hypot($s[$k], $A[$i][$k]);
+                    $s[$k] = hypot($s[$k], $a[$i][$k]);
                 }
 
                 if ($s[$k] != 0.0) {
-                    if ($A[$k][$k] < 0.0) {
+                    if ($a[$k][$k] < 0.0) {
                         $s[$k] = -$s[$k];
                     }
                     for ($i = $k; $i < $m; $i++) {
-                        $A[$i][$k] /= $s[$k];
+                        $a[$i][$k] /= $s[$k];
                     }
-                    $A[$k][$k] += 1.0;
+                    $a[$k][$k] += 1.0;
                 }
 
                 $s[$k] = -$s[$k];
@@ -111,18 +124,18 @@ class svd {
                     // Apply the transformation.
                     $t = 0;
                     for ($i = $k; $i < $m; $i++) {
-                        $t += $A[$i][$k] * $A[$i][$j];
+                        $t += $a[$i][$k] * $a[$i][$j];
                     }
 
-                    $t = -$t / $A[$k][$k];
+                    $t = -$t / $a[$k][$k];
                     for ($i = $k; $i < $m; $i++) {
-                        $A[$i][$j] += $t * $A[$i][$k];
+                        $a[$i][$j] += $t * $a[$i][$k];
                     }
                 }
 
                 // Place the k-th row of A into e for the
                 // subsequent calculation of the row transformation.
-                $e[$j] = $A[$k][$j];
+                $e[$j] = $a[$k][$j];
             }
 
             // TODO: delete want u later
@@ -130,7 +143,7 @@ class svd {
                 // Place the transformation in U for subsequent back
                 // multiplication.
                 for ($i = $k; $i < $m; $i++) {
-                    $U[$i][$k] = $A[$i][$k];
+                    $u[$i][$k] = $a[$i][$k];
                 }
             }
 
@@ -164,14 +177,14 @@ class svd {
 
                     for ($j = $k + 1; $j < $n; $j++) {
                         for ($i = $k + 1; $i < $m; $i++) {
-                            $work[$i] += $e[$j] * $A[$i][$j];
+                            $work[$i] += $e[$j] * $a[$i][$j];
                         }
                     }
 
                     for ($j = $k + 1; $j < $n; $j++) {
                         $t = -$e[$j] / $e[$k + 1];
                         for ($i = $k + 1; $i < $m; $i++) {
-                            $A[$i][$j] += $t * $work[$i];
+                            $a[$i][$j] += $t * $work[$i];
                         }
                     }
                 }
@@ -181,7 +194,7 @@ class svd {
                     // Place the transformation in V for subsequent
                     // back multiplication.
                     for ($i = $k + 1; $i < $n; $i++) {
-                        $V[$i][$k] = $e[$i];
+                        $v[$i][$k] = $e[$i];
                     }
                 }
             }
@@ -190,7 +203,7 @@ class svd {
         // Set up the final bidiagonal matrix or order p.
         $p = min($n, $m + 1);
         if ($nct < $n) {
-            $s[$nct] = $A[$nct][$nct];
+            $s[$nct] = $a[$nct][$nct];
         }
 
         if ($m < $p) {
@@ -198,7 +211,7 @@ class svd {
         }
 
         if ($nrt + 1 < $p) {
-            $e[$nrt] = $A[$nrt][$p - 1];
+            $e[$nrt] = $a[$nrt][$p - 1];
         }
 
         $e[$p - 1] = 0.0;
@@ -207,10 +220,10 @@ class svd {
         if ($wantu) {
             for ($j = $nct; $j < $nu; $j++) {
                 for ($i = 0; $i < $m; $i++) {
-                    $U[$i][$j] = 0.0;
+                    $u[$i][$j] = 0.0;
                 }
 
-                $U[$j][$j] = 1.0;
+                $u[$j][$j] = 1.0;
             }
 
             for ($k = $nct - 1; $k >= 0; $k--) {
@@ -218,29 +231,29 @@ class svd {
                     for ($j = $k + 1; $j < $nu; $j++) {
                         $t = 0;
                         for ($i = $k; $i < $m; $i++) {
-                            $t += $U[$i][$k] * $U[$i][$j];
+                            $t += $u[$i][$k] * $u[$i][$j];
                         }
 
-                        $t = -$t / $U[$k][$k];
+                        $t = -$t / $u[$k][$k];
                         for ($i = $k; $i < $m; $i++) {
-                            $U[$i][$j] += $t * $U[$i][$k];
+                            $u[$i][$j] += $t * $u[$i][$k];
                         }
                     }
 
                     for ($i = $k; $i < $m; $i++) {
-                        $U[$i][$k] = -$U[$i][$k];
+                        $u[$i][$k] = -$u[$i][$k];
                     }
 
-                    $U[$k][$k] = 1.0 + $U[$k][$k];
+                    $u[$k][$k] = 1.0 + $u[$k][$k];
                     for ($i = 0; $i < $k - 1; $i++) {
-                        $U[$i][$k] = 0.0;
+                        $u[$i][$k] = 0.0;
                     }
                 } else {
                     for ($i = 0; $i < $m; $i++) {
-                        $U[$i][$k] = 0.0;
+                        $u[$i][$k] = 0.0;
                     }
 
-                    $U[$k][$k] = 1.0;
+                    $u[$k][$k] = 1.0;
                 }
             }
         }
@@ -252,21 +265,21 @@ class svd {
                     for ($j = $k + 1; $j < $nu; $j++) {
                         $t = 0;
                         for ($i = $k + 1; $i < $n; $i++) {
-                              $t += $V[$i][$k] * $V[$i][$j];
+                              $t += $v[$i][$k] * $v[$i][$j];
                         }
 
-                        $t = -$t / $V[$k + 1][$k];
+                        $t = -$t / $v[$k + 1][$k];
                         for ($i = $k + 1; $i < $n; $i++) {
-                            $V[$i][$j] += $t * $V[$i][$k];
+                            $v[$i][$j] += $t * $v[$i][$k];
                         }
                     }
                 }
 
                 for ($i = 0; $i < $n; $i++) {
-                    $V[$i][$k] = 0.0;
+                    $v[$i][$k] = 0.0;
                 }
 
-                $V[$k][$k] = 1.0;
+                $v[$k][$k] = 1.0;
             }
         }
 
@@ -347,9 +360,9 @@ class svd {
                         // TODO: delete want v later
                         if ($wantv) {
                             for ($i = 0; $i < $n; $i++) {
-                                $t = $cs * $V[$i][$j] + $sn * $V[$i][$p - 1];
-                                $V[$i][$p - 1] = -$sn * $V[$i][$j] + $cs * $V[$i][$p - 1];
-                                $V[$i][$j] = $t;
+                                $t = $cs * $v[$i][$j] + $sn * $v[$i][$p - 1];
+                                $v[$i][$p - 1] = -$sn * $v[$i][$j] + $cs * $v[$i][$p - 1];
+                                $v[$i][$j] = $t;
                             }
                         }
                     }
@@ -372,9 +385,9 @@ class svd {
                         // TODO: delete want u later
                         if ($wantu) {
                             for ($i = 0; $i < $m; $i++) {
-                                $t = $cs * $U[$i][$j] + $sn * $U[$i][$k - 1];
-                                $U[$i][$k - 1] = -$sn * $U[$i][$j] + $cs * $U[$i][$k - 1];
-                                $U[$i][$j] = $t;
+                                $t = $cs * $u[$i][$j] + $sn * $u[$i][$k - 1];
+                                $u[$i][$k - 1] = -$sn * $u[$i][$j] + $cs * $u[$i][$k - 1];
+                                $u[$i][$j] = $t;
                             }
                         }
                     }
@@ -428,9 +441,9 @@ class svd {
                         // TODO: delete want v later
                         if ($wantv) {
                             for ($i = 0; $i < $n; $i++) {
-                                  $t = $cs * $V[$i][$j] + $sn * $V[$i][$j + 1];
-                                  $V[$i][$j + 1] = -$sn * $V[$i][$j] + $cs * $V[$i][$j + 1];
-                                  $V[$i][$j] = $t;
+                                  $t = $cs * $v[$i][$j] + $sn * $v[$i][$j + 1];
+                                  $v[$i][$j + 1] = -$sn * $v[$i][$j] + $cs * $v[$i][$j + 1];
+                                  $v[$i][$j] = $t;
                             }
                         }
 
@@ -446,9 +459,9 @@ class svd {
                         // TODO: delete want u later
                         if ($wantu && ($j < $m - 1)) {
                             for ($i = 0; $i < $m; $i++) {
-                                $t = $cs * $U[$i][$j] + $sn * $U[$i][$j + 1];
-                                $U[$i][$j + 1] = -$sn * $U[$i][$j] + $cs * $U[$i][$j + 1];
-                                $U[$i][$j] = $t;
+                                $t = $cs * $u[$i][$j] + $sn * $u[$i][$j + 1];
+                                $u[$i][$j + 1] = -$sn * $u[$i][$j] + $cs * $u[$i][$j + 1];
+                                $u[$i][$j] = $t;
                             }
                         }
                     }
@@ -466,7 +479,7 @@ class svd {
                         // TODO: delete want v later
                         if ($wantv) {
                             for ($i = 0; $i <= $pp; $i++) {
-                                $V[$i][$k] = -$V[$i][$k];
+                                $v[$i][$k] = -$v[$i][$k];
                             }
                         }
                     }
@@ -483,18 +496,18 @@ class svd {
                         // TODO: delete want v later
                         if ($wantv && ($k < $n - 1)) {
                             for ($i = 0; $i < $n; $i++) {
-                                $t = $V[$i][$k + 1];
-                                $V[$i][$k + 1] = $V[$i][$k];
-                                $V[$i][$k] = $t;
+                                $t = $v[$i][$k + 1];
+                                $v[$i][$k + 1] = $v[$i][$k];
+                                $v[$i][$k] = $t;
                             }
                         }
 
                         // TODO: delete want u later
                         if ($wantu && ($k < $m - 1)) {
                             for ($i = 0; $i < $m; $i++) {
-                                $t = $U[$i][$k + 1];
-                                $U[$i][$k + 1] = $U[$i][$k];
-                                $U[$i][$k] = $t;
+                                $t = $u[$i][$k + 1];
+                                $u[$i][$k + 1] = $u[$i][$k];
+                                $u[$i][$k] = $t;
                             }
                         }
 
@@ -508,41 +521,61 @@ class svd {
             }
         }
 
-        $this->U = $U;
+        $this->U = $u;
         $this->Sv = $s;
-        $this->V = $V;
+        $this->V = $v;
     }
 
-    public function U() {
+    /**
+     * Get left singular vectors.
+     *
+     * @return array U matrix
+     */
+    public function u() {
         return $this->U;
     }
 
     /**
      * Calculate the multi-diagonal S
      */
-    public function S() {
-        $S = array_fill(0, $this->m, array_fill(0, $this->n, 0));
+    public function s() {
+        $s = array_fill(0, $this->m, array_fill(0, $this->n, 0));
         for ($i = 0; $i < $this->m; $i++) {
-            $S[$i][$i] = $this->Sv[$i];
+            $s[$i][$i] = $this->Sv[$i];
         }
 
-        return $S;
+        return $s;
     }
 
-    public function V() {
+    /**
+     * Get right singular vectors.
+     *
+     * @return array V matrix
+     */
+    public function v() {
         return $this->V;
     }
 
-    public function VT() {
+    /**
+     * Get transposed right singular vectors.
+     *
+     * @return array V^T matrix
+     */
+    public function vt() {
         return $this->matrix->transpose($this->V);
     }
 
+    /**
+     * Calculate the rank of the matrix.
+     *
+     * @return int Matrix rank
+     */
     public function rank() {
-        $EPS = pow(2, -52);
-        $TOL = max($this->m, $this->n) * $this->Sv[0] * $EPS;
+        $eps = pow(2, -52);
+        $tol = max($this->m, $this->n) * $this->Sv[0] * $eps;
         $rank = 0;
         for ($i = 0; $i < count($this->Sv); $i++) {
-            if ($this->Sv[$i] > $TOL) {
+            if ($this->Sv[$i] > $tol) {
                 ++$rank;
             }
         }
@@ -553,22 +586,22 @@ class svd {
     /**
      * Low rank approximation
      */
-    public function K() {
+    public function k() {
         $q = 0.9;
-        $K = 0;
-        $frobA = 0;
-        $frobAk = 0;
+        $k = 0;
+        $froba = 0;
+        $frobak = 0;
         for ($i = 0; $i < $this->rank(); $i++) {
-            $frobA += $this->Sv[$i];
+            $froba += $this->Sv[$i];
         }
         do {
-            for ($i = 0; $i <= $K; $i++) {
-                $frobAk += $this->Sv[$i];
+            for ($i = 0; $i <= $k; $i++) {
+                $frobak += $this->Sv[$i];
             }
-            $clt = $frobAk / $frobA;
-            $K++;
+            $clt = $frobak / $froba;
+            $k++;
         } while ($clt < $q);
 
-        return $K;
+        return $k;
     }
 }
