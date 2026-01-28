@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Unit tests for the NLP tokenizer.
+ * Unit tests for the NLP vectorizer.
  *
  * @package    qtype_essaysimilarity
  * @copyright  2026 Your Name
@@ -27,14 +27,14 @@ namespace qtype_essaysimilarity;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/tokenizer.php');
+require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/vectorizer/whitespace_vectorizer/whitespace_vectorizer.php');
 
 /**
- * Unit tests for the NLP tokenizer.
+ * Unit tests for the NLP vectorizer.
  *
  * @copyright  2026 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers     \Tokenizer
+ * @covers     \whitespace_vectorizer
  */
 final class tokenizer_test extends \advanced_testcase {
     /**
@@ -46,13 +46,13 @@ final class tokenizer_test extends \advanced_testcase {
     }
 
     /**
-     * Test tokenizer with English text.
+     * Test vectorizer with English text.
      */
     public function test_tokenize_english(): void {
-        $tokenizer = new \Tokenizer('en');
+        $vectorizer = \whitespace_vectorizer::create('en');
         $text = 'This is a simple test of the tokenizer.';
 
-        $tokens = $tokenizer->tokenize($text);
+        $tokens = $vectorizer->vectorize($text);
 
         $this->assertIsArray($tokens);
         $this->assertNotEmpty($tokens);
@@ -61,13 +61,13 @@ final class tokenizer_test extends \advanced_testcase {
     }
 
     /**
-     * Test tokenizer with punctuation.
+     * Test vectorizer with punctuation.
      */
     public function test_tokenize_punctuation(): void {
-        $tokenizer = new \Tokenizer('en');
+        $vectorizer = \whitespace_vectorizer::create('en');
         $text = 'Hello, world! This is a test.';
 
-        $tokens = $tokenizer->tokenize($text);
+        $tokens = $vectorizer->vectorize($text);
 
         $this->assertIsArray($tokens);
         // Punctuation should be removed or handled appropriately.
@@ -76,13 +76,13 @@ final class tokenizer_test extends \advanced_testcase {
     }
 
     /**
-     * Test tokenizer converts to lowercase.
+     * Test vectorizer converts to lowercase.
      */
     public function test_tokenize_lowercase(): void {
-        $tokenizer = new \Tokenizer('en');
+        $vectorizer = \whitespace_vectorizer::create('en');
         $text = 'UPPERCASE lowercase MixedCase';
 
-        $tokens = $tokenizer->tokenize($text);
+        $tokens = $vectorizer->vectorize($text);
 
         $this->assertIsArray($tokens);
         // Should be converted to lowercase.
@@ -92,26 +92,26 @@ final class tokenizer_test extends \advanced_testcase {
     }
 
     /**
-     * Test tokenizer with empty string.
+     * Test vectorizer with empty string.
      */
     public function test_tokenize_empty(): void {
-        $tokenizer = new \Tokenizer('en');
+        $vectorizer = \whitespace_vectorizer::create('en');
         $text = '';
 
-        $tokens = $tokenizer->tokenize($text);
+        $tokens = $vectorizer->vectorize($text);
 
         $this->assertIsArray($tokens);
         $this->assertEmpty($tokens);
     }
 
     /**
-     * Test tokenizer with no language specified.
+     * Test vectorizer with no language specified.
      */
     public function test_tokenize_no_language(): void {
-        $tokenizer = new \Tokenizer('none');
+        $vectorizer = \whitespace_vectorizer::create('none');
         $text = 'Testing without specific language.';
 
-        $tokens = $tokenizer->tokenize($text);
+        $tokens = $vectorizer->vectorize($text);
 
         $this->assertIsArray($tokens);
         $this->assertNotEmpty($tokens);
