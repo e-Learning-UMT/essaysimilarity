@@ -136,8 +136,8 @@ class matrix {
     public function round($matrix) {
         $result = [];
 
-        foreach ($matrix as $i => $) {
-            foreach ($matrix[0] as $j => $) {
+        foreach ($matrix as $i => $row) {
+            foreach ($matrix[0] as $j => $col) {
                 $result[$i][$j] = round($matrix[$j][$i], 2);
             }
         }
