@@ -96,11 +96,11 @@ class svd {
         $e = array_fill(0, $n, 0);
         $work = array_fill(0, $m, 0);
 
-        // TODO: delete want u and want v later
+        // TODO: delete want u and want v later.
         $wantu = true;
         $wantv = true;
 
-        // Reduce A to bidiagonal form,
+        // Reduce A to bidiagonal form.
         // storing the diagonal elements in S and the super-diagonal elements in e.
         $nct = min($m - 1, $n);
         $nrt = max(0, min($n - 2, $m));
@@ -146,7 +146,7 @@ class svd {
                 $e[$j] = $a[$k][$j];
             }
 
-            // TODO: delete want u later
+            // TODO: delete want u later.
             if ($wantu && ($k < $nct)) {
                 // Place the transformation in U for subsequent back
                 // multiplication.
@@ -197,7 +197,7 @@ class svd {
                     }
                 }
 
-                // TODO: delete want v later
+                // TODO: delete want v later.
                 if ($wantv) {
                     // Place the transformation in V for subsequent
                     // back multiplication.
@@ -224,7 +224,7 @@ class svd {
 
         $e[$p - 1] = 0.0;
 
-        // TODO: delete want u later
+        // TODO: delete want u later.
         if ($wantu) {
             for ($j = $nct; $j < $nu; $j++) {
                 for ($i = 0; $i < $m; $i++) {
@@ -266,7 +266,7 @@ class svd {
             }
         }
 
-        // TODO: delete want v later
+        // TODO: delete want v later.
         if ($wantv) {
             for ($k = $n - 1; $k >= 0; $k--) {
                 if (($k < $nrt) && ($e[$k] != 0.0)) {
@@ -365,7 +365,7 @@ class svd {
                             $e[$j - 1] = $cs * $e[$j - 1];
                         }
 
-                        // TODO: delete want v later
+                        // TODO: delete want v later.
                         if ($wantv) {
                             for ($i = 0; $i < $n; $i++) {
                                 $t = $cs * $v[$i][$j] + $sn * $v[$i][$p - 1];
@@ -389,7 +389,7 @@ class svd {
                         $f = -$sn * $e[$j];
                         $e[$j] = $cs * $e[$j];
 
-                        // TODO: delete want u later
+                        // TODO: delete want u later.
                         if ($wantu) {
                             for ($i = 0; $i < $m; $i++) {
                                 $t = $cs * $u[$i][$j] + $sn * $u[$i][$k - 1];
@@ -444,7 +444,7 @@ class svd {
                         $g = $sn * $s[$j + 1];
                         $s[$j + 1] = $cs * $s[$j + 1];
 
-                        // TODO: delete want v later
+                        // TODO: delete want v later.
                         if ($wantv) {
                             for ($i = 0; $i < $n; $i++) {
                                   $t = $cs * $v[$i][$j] + $sn * $v[$i][$j + 1];
@@ -462,7 +462,7 @@ class svd {
                         $g = $sn * $e[$j + 1];
                         $e[$j + 1] = $cs * $e[$j + 1];
 
-                        // TODO: delete want u later
+                        // TODO: delete want u later.
                         if ($wantu && ($j < $m - 1)) {
                             for ($i = 0; $i < $m; $i++) {
                                 $t = $cs * $u[$i][$j] + $sn * $u[$i][$j + 1];
@@ -481,7 +481,7 @@ class svd {
                     if ($s[$k] <= 0.0) {
                         $s[$k] = ($s[$k] < 0.0 ? -$s[$k] : 0.0);
 
-                        // TODO: delete want v later
+                        // TODO: delete want v later.
                         if ($wantv) {
                             for ($i = 0; $i <= $pp; $i++) {
                                 $v[$i][$k] = -$v[$i][$k];
@@ -498,7 +498,7 @@ class svd {
                         $s[$k] = $s[$k + 1];
                         $s[$k + 1] = $t;
 
-                        // TODO: delete want v later
+                        // TODO: delete want v later.
                         if ($wantv && ($k < $n - 1)) {
                             for ($i = 0; $i < $n; $i++) {
                                 $t = $v[$i][$k + 1];
@@ -507,7 +507,7 @@ class svd {
                             }
                         }
 
-                        // TODO: delete want u later
+                        // TODO: delete want u later.
                         if ($wantu && ($k < $m - 1)) {
                             for ($i = 0; $i < $m; $i++) {
                                 $t = $u[$i][$k + 1];
@@ -540,7 +540,7 @@ class svd {
     }
 
     /**
-     * Calculate the multi-diagonal S
+     * Calculate the multi-diagonal S.
      */
     public function s() {
         $s = array_fill(0, $this->m, array_fill(0, $this->n, 0));
@@ -588,7 +588,7 @@ class svd {
     }
 
     /**
-     * Low rank approximation
+     * Low rank approximation.
      */
     public function k() {
         $q = 0.9;

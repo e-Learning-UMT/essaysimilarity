@@ -67,7 +67,7 @@ class matrix {
     }
 
     /**
-     * Get matrix from the original documents vector
+     * Get matrix from the original documents vector.
      */
     public function get() {
         $matrix = [];
@@ -81,7 +81,7 @@ class matrix {
     }
 
     /**
-     * Matrix multiplication
+     * Matrix Multiplication.
      *
      * @param array $matrix_a A multi-dimensional matrix
      * @param array $matrix_a A matrix that at least one dimensional

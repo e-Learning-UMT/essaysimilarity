@@ -28,9 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->cron      = 0;
 $plugin->component = 'qtype_essaysimilarity';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->requires  = 2024100700; // Moodle 5.1
+$plugin->requires  = 2024100700; // Moodle 5.1.
 $plugin->version   = 2026012800;
-$plugin->release   = '1.1.0';
+$plugin->release   = '1.1.0'; // Release.
 
 // https://docs.moodle.org/dev/Releases
 // Moodle 3.11 2021051700 17 May 20`21
@@ -54,4 +54,4 @@ $plugin->release   = '1.1.0';
 // Moodle 2.3 2012062500 25 Jun 2012
 // Moodle 2.2 2011120500  5 Dec 2011
 // Moodle 2.1 2011070100  1 Jul 2011
-// Moodle 2.0 2010112400 24 Nov 2010
+// Moodle 2.0 2010112400 24 Nov 2010.

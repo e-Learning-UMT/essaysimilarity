@@ -71,7 +71,8 @@ final class question_test extends \advanced_testcase {
         $question->graderinfoformat = FORMAT_HTML;
         $question->responsetemplate = '';
         $question->responsetemplateformat = FORMAT_HTML;
-        $question->answerkey = 'Software testing is a process of evaluating a software application to ensure it meets requirements and is free from defects.';
+        $question->answerkey = 'Software testing is a process of evaluating a software '
+            . 'application to ensure it meets requirements and is free from defects.';
         $question->answerkeyformat = FORMAT_HTML;
         $question->showanswerkey = 0;
         $question->showfeedback = 3;

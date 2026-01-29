@@ -117,7 +117,7 @@ class qtype_essaysimilarity extends question_type {
      * @return bool Success status
      */
     public function get_question_options($question) {
-        parent::get_question_options($question);
+        return parent::get_question_options($question);
     }
 
     /**

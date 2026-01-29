@@ -40,7 +40,8 @@ require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer
  * The rewrite instead of using Richard Heyes's implementation has
  * been to improve performance.
  *
- * Credit to @angeloskath, copied from https://github.com/angeloskath/php-nlp-tools/blob/master/src/NlpTools/Stemmers/PorterStemmer.php
+ * Credit to @angeloskath, copied from
+ * https://github.com/angeloskath/php-nlp-tools/blob/master/src/NlpTools/Stemmers/PorterStemmer.php
  */
 class en_stemmer implements stemmer {
     /**
@@ -391,7 +392,7 @@ class en_stemmer implements stemmer {
                     $this->r("ble", 3);
                     break;
                 }
-                // -DEPARTURE-
+                // -DEPARTURE-.
                 // To match the published algorithm, replace the above line with
                 // If ($this->ends("abli",4)) { $this->r("able",4); break; }.
                 if ($this->ends("alli", 4)) {
@@ -462,8 +463,8 @@ class en_stemmer implements stemmer {
                     $this->r("log", 3);
                     break;
                 }
-                // -DEPARTURE-
-                // To match the published algorithm delete the above line
+                // -DEPARTURE-.
+                // To match the published algorithm delete the above line.
         }
     }
 

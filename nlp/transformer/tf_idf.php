@@ -70,7 +70,7 @@ class tf_idf {
 
         $ndocs = count($this->documents);
         foreach ($this->idf as &$value) {
-            $value = 1 + log((float) (($ndocs + 1) / ($value + 1)), 10.0); // idf with smoothing to avoid division by zero
+            $value = 1 + log((float) (($ndocs + 1) / ($value + 1)), 10.0); // IDF with smoothing to avoid division by zero.
         }
     }
 
