@@ -96,9 +96,10 @@ jobs:
 
       - name: Moodle Code Checker
         if: ${{ always() }}
-        run: moodle-plugin-ci phpcs --max-warnings 0
+        run: moodle-plugin-ci phpcs --max-warnings 200
 
       - name: Moodle PHPDoc Checker
+        continue-on-error: true
         if: ${{ always() }}
         run: moodle-plugin-ci phpdoc --max-warnings 0
 

@@ -374,7 +374,7 @@ class svd {
                             }
                         }
                     }
-                break;
+                    break;
 
                 // Split at negligible s(k).
                 case 2:
@@ -398,7 +398,7 @@ class svd {
                             }
                         }
                     }
-                break;
+                    break;
 
                 // Perform one qr step.
                 case 3:
@@ -474,7 +474,7 @@ class svd {
 
                     $e[$p - 2] = $f;
                     $iter = $iter + 1;
-                break;
+                    break;
 
                 case 4:
                     // Make the singular values positive.
@@ -521,7 +521,7 @@ class svd {
 
                     $iter = 0;
                     $p--;
-                break;
+                    break;
             }
         }
 
