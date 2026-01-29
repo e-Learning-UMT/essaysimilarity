@@ -392,7 +392,7 @@ class en_stemmer implements stemmer {
                     $this->r("ble", 3);
                     break;
                 }
-                // -DEPARTURE-.
+                // Departure from the published algorithm.
                 // To match the published algorithm, replace the above line with
                 // If ($this->ends("abli",4)) { $this->r("able",4); break; }.
                 if ($this->ends("alli", 4)) {
@@ -463,7 +463,7 @@ class en_stemmer implements stemmer {
                     $this->r("log", 3);
                     break;
                 }
-                // -DEPARTURE-.
+                // Departure from the published algorithm.
                 // To match the published algorithm delete the above line.
         }
     }

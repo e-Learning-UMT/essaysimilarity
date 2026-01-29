@@ -101,7 +101,8 @@ class svd {
         $wantv = true;
 
         // Reduce A to bidiagonal form.
-        // storing the diagonal elements in S and the super-diagonal elements in e.
+        // Store the diagonal elements in S.
+        // Store the super-diagonal elements in e.
         $nct = min($m - 1, $n);
         $nrt = max(0, min($n - 2, $m));
         for ($k = 0; $k < max($nct, $nrt); $k++) {

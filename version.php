@@ -32,7 +32,7 @@ $plugin->requires  = 2024100700; // Moodle 5.1.
 $plugin->version   = 2026012800;
 $plugin->release   = '1.1.0'; // Release.
 
-// https://docs.moodle.org/dev/Releases
+// Reference: https://docs.moodle.org/dev/Releases.
 // Moodle 3.11 2021051700 17 May 20`21
 // Moodle 3.10 2020110900 9 Nov 2020
 // Moodle 3.9 2020061500 15 Jun 2020 <= LTS

@@ -72,7 +72,7 @@ class matrix {
     public function get() {
         $matrix = [];
 
-        // Convert string key to numerical key for operational
+        // Convert string key to numerical key for operations.
         foreach ($this->original as $mtx) {
             $matrix[] = array_values($mtx);
         }
@@ -93,7 +93,7 @@ class matrix {
         $colsa = count($matrixa[0]);
         $rowsb = count($matrixb);
 
-        // multiplication cannot be done
+        // Multiplication cannot be done.
         if ($colsa !== $rowsb) {
             throw new InvalidArgumentException("Column A ($colsa) and Row B ($rowsb) is not equal");
         }

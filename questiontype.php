@@ -111,16 +111,6 @@ class qtype_essaysimilarity extends question_type {
     }
 
     /**
-     * Get question options from database.
-     *
-     * @param object $question The question object
-     * @return bool Success status
-     */
-    public function get_question_options($question) {
-        return parent::get_question_options($question);
-    }
-
-    /**
      * Save question options to database.
      *
      * @param object $question The question object

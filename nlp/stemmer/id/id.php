@@ -99,23 +99,23 @@ class id_stemmer implements stemmer {
      * Cek prefix disallowed sufixes (kombinasi awalan dan akhiran yang tidak diizinkan)
      */
     private function cek_prefix_disallowed_suffixes($kata) {
-        if (preg_match('/^(be)[[:alpha:]]+/(i)\z/i', $kata)) { // be- dan -i.
+        if (preg_match('/^(be)[[:alpha:]]+/(i)\z/i', $kata)) { // Be- dan -i.
             return true;
         }
 
-        if (preg_match('/^(se)[[:alpha:]]+/(i|kan)\z/i', $kata)) { // se- dan -i,-kan.
+        if (preg_match('/^(se)[[:alpha:]]+/(i|kan)\z/i', $kata)) { // Se- dan -i,-kan.
             return true;
         }
 
-        if (preg_match('/^(di)[[:alpha:]]+/(an)\z/i', $kata)) { // di- dan -an.
+        if (preg_match('/^(di)[[:alpha:]]+/(an)\z/i', $kata)) { // Di- dan -an.
             return true;
         }
 
-        if (preg_match('/^(me)[[:alpha:]]+/(an)\z/i', $kata)) { // me- dan -an.
+        if (preg_match('/^(me)[[:alpha:]]+/(an)\z/i', $kata)) { // Me- dan -an.
             return true;
         }
 
-        if (preg_match('/^(ke)[[:alpha:]]+/(i|kan)\z/i', $kata)) { // ke- dan -i,-kan.
+        if (preg_match('/^(ke)[[:alpha:]]+/(i|kan)\z/i', $kata)) { // Ke- dan -i,-kan.
             return true;
         }
 
@@ -167,7 +167,7 @@ class id_stemmer implements stemmer {
             }
         }
 
-        if (preg_match('/^([^aiueo])e\\1[aiueo]\S{1,}/i', $kata)) { // aturan  37.
+        if (preg_match('/^([^aiueo])e\\1[aiueo]\S{1,}/i', $kata)) { // Aturan 37.
             $kata = preg_replace('/^([^aiueo])e/', '', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -182,7 +182,7 @@ class id_stemmer implements stemmer {
         if (preg_match('/^([tmbp]e)\S{1,}/', $kata)) { // Jika awalannya adalah “te-”, “me-”, “be-”, atau “pe-”
             /*------------ Awalan “be-”, ---------------------------------------------*/
             if (preg_match('/^(be)\S{1,}/', $kata)) { // Jika awalan “be-”.
-                if (preg_match('/^(ber)[aiueo]\S{1,}/', $kata)) { // aturan 1.
+                if (preg_match('/^(ber)[aiueo]\S{1,}/', $kata)) { // Aturan 1.
                     $kata = preg_replace('/^(ber)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -204,7 +204,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(ber)[^aiueor][[:alpha:]](?!er)\S{1,}/', $kata)) { // aturan  2.
+                if (preg_match('/^(ber)[^aiueor][[:alpha:]](?!er)\S{1,}/', $kata)) { // Aturan 2.
                     $kata = preg_replace('/^(ber)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -216,7 +216,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(ber)[^aiueor][[:alpha:]]er[aiueo]\S{1,}/', $kata)) { // aturan  3.
+                if (preg_match('/^(ber)[^aiueor][[:alpha:]]er[aiueo]\S{1,}/', $kata)) { // Aturan 3.
                     $kata = preg_replace('/^(ber)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -228,7 +228,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^belajar\S{0,}/', $kata)) { // aturan  4.
+                if (preg_match('/^belajar\S{0,}/', $kata)) { // Aturan 4.
                     $kata = preg_replace('/^(bel)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -240,7 +240,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(be)[^aiueolr]er[^aiueo]\S{1,}/', $kata)) { // aturan  5.
+                if (preg_match('/^(be)[^aiueolr]er[^aiueo]\S{1,}/', $kata)) { // Aturan 5.
                     $kata = preg_replace('/^(be)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -260,7 +260,7 @@ class id_stemmer implements stemmer {
                     return $kata;
                 }
 
-                if (preg_match('/^(ter)[aiueo]\S{1,}/', $kata)) { // aturan 6.
+                if (preg_match('/^(ter)[aiueo]\S{1,}/', $kata)) { // Aturan 6.
                     $kata = preg_replace('/^(ter)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -282,7 +282,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(ter)[^aiueor]er[aiueo]\S{1,}/', $kata)) { // aturan 7.
+                if (preg_match('/^(ter)[^aiueor]er[aiueo]\S{1,}/', $kata)) { // Aturan 7.
                     $kata = preg_replace('/^(ter)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -294,7 +294,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(ter)[^aiueor](?!er)\S{1,}/', $kata)) { // aturan 8.
+                if (preg_match('/^(ter)[^aiueor](?!er)\S{1,}/', $kata)) { // Aturan 8.
                     $kata = preg_replace('/^(ter)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -306,7 +306,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(te)[^aiueor]er[aiueo]\S{1,}/', $kata)) { // aturan 9.
+                if (preg_match('/^(te)[^aiueor]er[aiueo]\S{1,}/', $kata)) { // Aturan 9.
                     $kata = preg_replace('/^(te)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -318,7 +318,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(ter)[^aiueor]er[^aiueo]\S{1,}/', $kata)) { // aturan  35 belum bisa.
+                if (preg_match('/^(ter)[^aiueor]er[^aiueo]\S{1,}/', $kata)) { // Aturan 35 belum bisa.
                     $kata = preg_replace('/^(ter)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -334,7 +334,7 @@ class id_stemmer implements stemmer {
             /*------------end “te-”, ---------------------------------------------*/
             /*------------ Awalan “me-”, ---------------------------------------------*/
             if (preg_match('/^(me)\S{1,}/', $kata)) { // Jika awalan “me-”.
-                if (preg_match('/^(me)[lrwyv][aiueo]/', $kata)) { // aturan 10.
+                if (preg_match('/^(me)[lrwyv][aiueo]/', $kata)) { // Aturan 10.
                     $kata = preg_replace('/^(me)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -346,7 +346,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(mem)[bfvp]\S{1,}/', $kata)) { // aturan 11.
+                if (preg_match('/^(mem)[bfvp]\S{1,}/', $kata)) { // Aturan 11.
                     $kata = preg_replace('/^(mem)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -358,7 +358,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(mem)((r[aiueo])|[aiueo])\S{1,}/', $kata)) {// aturan 13.
+                if (preg_match('/^(mem)((r[aiueo])|[aiueo])\S{1,}/', $kata)) {// Aturan 13.
                     $kata = preg_replace('/^(mem)/', 'm', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -380,7 +380,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(men)[cdjszt]\S{1,}/', $kata)) { // aturan 14.
+                if (preg_match('/^(men)[cdjszt]\S{1,}/', $kata)) { // Aturan 14.
                     $kata = preg_replace('/^(men)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -392,7 +392,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(men)[aiueo]\S{1,}/', $kata)) {// aturan 15.
+                if (preg_match('/^(men)[aiueo]\S{1,}/', $kata)) {// Aturan 15.
                     $kata = preg_replace('/^(men)/', 'n', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -414,7 +414,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(meng)[ghqk]\S{1,}/', $kata)) { // aturan 16.
+                if (preg_match('/^(meng)[ghqk]\S{1,}/', $kata)) { // Aturan 16.
                     $kata = preg_replace('/^(meng)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -426,7 +426,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(meng)[aiueo]\S{1,}/', $kata)) { // aturan 17.
+                if (preg_match('/^(meng)[aiueo]\S{1,}/', $kata)) { // Aturan 17.
                     $kata = preg_replace('/^(meng)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -458,7 +458,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(meny)[aiueo]\S{1,}/', $kata)) { // aturan 18.
+                if (preg_match('/^(meny)[aiueo]\S{1,}/', $kata)) { // Aturan 18.
                     $kata = preg_replace('/^(meny)/', 's', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -484,7 +484,7 @@ class id_stemmer implements stemmer {
             /*------------end “me-”, ---------------------------------------------*/
             /*------------ Awalan “pe-”, ---------------------------------------------*/
             if (preg_match('/^(pe)\S{1,}/', $kata)) { // Jika awalan “pe-”.
-                if (preg_match('/^(pe)[wy]\S{1,}/', $kata)) { // aturan 20.
+                if (preg_match('/^(pe)[wy]\S{1,}/', $kata)) { // Aturan 20.
                     $kata = preg_replace('/^(pe)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -496,7 +496,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(per)[aiueo]\S{1,}/', $kata)) { // aturan 21.
+                if (preg_match('/^(per)[aiueo]\S{1,}/', $kata)) { // Aturan 21.
                     $kata = preg_replace('/^(per)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -518,7 +518,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(per)[^aiueor][[:alpha:]](?!er)\S{1,}/', $kata)) { // aturan  23.
+                if (preg_match('/^(per)[^aiueor][[:alpha:]](?!er)\S{1,}/', $kata)) { // Aturan 23.
                     $kata = preg_replace('/^(per)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -530,7 +530,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(per)[^aiueor][[:alpha:]](er)[aiueo]\S{1,}/', $kata)) { // aturan  24.
+                if (preg_match('/^(per)[^aiueor][[:alpha:]](er)[aiueo]\S{1,}/', $kata)) { // Aturan 24.
                     $kata = preg_replace('/^(per)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -542,7 +542,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pem)[bfv]\S{1,}/', $kata)) { // aturan  25.
+                if (preg_match('/^(pem)[bfv]\S{1,}/', $kata)) { // Aturan 25.
                     $kata = preg_replace('/^(pem)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -554,7 +554,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pem)(r[aiueo]|[aiueo])\S{1,}/', $kata)) { // aturan  26.
+                if (preg_match('/^(pem)(r[aiueo]|[aiueo])\S{1,}/', $kata)) { // Aturan 26.
                     $kata = preg_replace('/^(pem)/', 'm', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -576,7 +576,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pen)[cdjzt]\S{1,}/', $kata)) { // aturan  27.
+                if (preg_match('/^(pen)[cdjzt]\S{1,}/', $kata)) { // Aturan 27.
                     $kata = preg_replace('/^(pen)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -588,7 +588,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pen)[aiueo]\S{1,}/', $kata)) { // aturan  28.
+                if (preg_match('/^(pen)[aiueo]\S{1,}/', $kata)) { // Aturan 28.
                     $kata = preg_replace('/^(pen)/', 'n', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -610,7 +610,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(peng)[^aiueo]\S{1,}/', $kata)) { // aturan  29.
+                if (preg_match('/^(peng)[^aiueo]\S{1,}/', $kata)) { // Aturan 29.
                     $kata = preg_replace('/^(peng)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -622,7 +622,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(peng)[aiueo]\S{1,}/', $kata)) { // aturan  30.
+                if (preg_match('/^(peng)[aiueo]\S{1,}/', $kata)) { // Aturan 30.
                     $kata = preg_replace('/^(peng)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -654,7 +654,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(peny)[aiueo]\S{1,}/', $kata)) { // aturan  31.
+                if (preg_match('/^(peny)[aiueo]\S{1,}/', $kata)) { // Aturan 31.
                     $kata = preg_replace('/^(peny)/', 's', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -676,7 +676,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pel)[aiueo]\S{1,}/', $kata)) { // aturan  32.
+                if (preg_match('/^(pel)[aiueo]\S{1,}/', $kata)) { // Aturan 32.
                     $kata = preg_replace('/^(pel)/', 'l', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -700,7 +700,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pe)[^rwylmn]er[aiueo]\S{1,}/', $kata)) { // aturan  33.
+                if (preg_match('/^(pe)[^rwylmn]er[aiueo]\S{1,}/', $kata)) { // Aturan 33.
                     $kata = preg_replace('/^(pe)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -712,7 +712,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pe)[^rwylmn](?!er)\S{1,}/', $kata)) { // aturan  34.
+                if (preg_match('/^(pe)[^rwylmn](?!er)\S{1,}/', $kata)) { // Aturan 34.
                     $kata = preg_replace('/^(pe)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -724,7 +724,7 @@ class id_stemmer implements stemmer {
                     }
                 }
 
-                if (preg_match('/^(pe)[^aiueor]er[^aiueo]\S{1,}/', $kata)) { // aturan  36.
+                if (preg_match('/^(pe)[^aiueor]er[^aiueo]\S{1,}/', $kata)) { // Aturan 36.
                     $kata = preg_replace('/^(pe)/', '', $kata);
                     if ($this->cek_kamus($kata)) {
                         return $kata; // Jika ada balik.
@@ -751,7 +751,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            // *-- Cek luluh -r ----------.
+            // Cek luluh -r.
             $kata = preg_replace('/^(memper)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -776,7 +776,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            // *-- Cek luluh -r ----------.
+            // Cek luluh -r.
             $kata = preg_replace('/^(mempel)/', 'l', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -800,7 +800,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            // *-- Cek luluh -r ----------.
+            // Cek luluh -r.
             $kata = preg_replace('/^(menter)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -824,7 +824,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            // *-- Cek luluh -r ----------.
+            // Cek luluh -r.
             $kata = preg_replace('/^(member)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -849,7 +849,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            /*-- Cek luluh -r ----------*/
+            // Cek luluh -r.
             $kata = preg_replace('/^(diper)', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -874,7 +874,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            /*-- Cek luluh -r ----------*/
+            // Cek luluh -r.
             $kata = preg_replace('/^(diter)', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -899,7 +899,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            /*-- Cek luluh -l----------*/
+            // Cek luluh -l.
             $kata = preg_replace('/^(dipel)/', '', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -947,7 +947,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            /*-- Cek luluh -l----------*/
+            // Cek luluh -l.
             $kata = preg_replace('/^(diber)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -972,7 +972,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            /*-- Cek luluh -l----------*/
+            // Cek luluh -l.
             $kata = preg_replace('/^(keber)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -997,7 +997,7 @@ class id_stemmer implements stemmer {
                 return $kata;
             }
 
-            /*-- Cek luluh -l----------*/
+            // Cek luluh -l.
             $kata = preg_replace('/^(keter)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
@@ -1040,7 +1040,7 @@ class id_stemmer implements stemmer {
      */
     private function is_plural($word) {
         // -ku|-mu|-nya.
-        // nikmat-Ku, etc.
+        // Nikmat-Ku, etc.
         if (preg_match('/^(.*)-(ku|mu|nya|lah|kah|tah|pun)$/', $word, $words)) {
             return strpos($words[1], '-') !== false;
         }
@@ -1057,7 +1057,7 @@ class id_stemmer implements stemmer {
     private function stem_plural($word) {
         preg_match('/^(.*)-(.*)$/', $word, $words);
         if (!empty($words)) {
-            // malaikat-malaikat-nya -> malaikat malaikatnya.
+            // Malaikat-malaikat-nya -> malaikat malaikatnya.
             $suffix = $words[2];
             if (
                 in_array($suffix, ['ku', 'mu', 'nya', 'lah', 'kah', 'tah', 'pun']) &&

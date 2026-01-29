@@ -27,8 +27,6 @@ namespace qtype_essaysimilarity\privacy;
 
 use core_privacy\local\metadata\collection;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for qtype_essaysimilarity implementing metadata provider
  *
