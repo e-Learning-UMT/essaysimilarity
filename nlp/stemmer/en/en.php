@@ -43,6 +43,9 @@ require_once($CFG->dirroot . '/question/type/essaysimilarity/nlp/stemmer/stemmer
  * Credit to @angeloskath, copied from https://github.com/angeloskath/php-nlp-tools/blob/master/src/NlpTools/Stemmers/PorterStemmer.php
  */
 class en_stemmer implements stemmer {
+    /**
+     * @var array Vowel characters used in stemming algorithm.
+     */
     protected static $vowels = [
     'a' => 'a',
     'e' => 'e',
@@ -81,12 +84,29 @@ class en_stemmer implements stemmer {
      * our case so it is removed. $k is readjusted to point to the end
      * of the string and b is changed so at the end b[0:k] will hold
      * the stem.
-     *
+     */
+
+    /**
+     * @var string Buffer holding the word to be stemmed.
      */
     private $b;
-    private $k, $j;
 
-    /* cons(i) is TRUE <=> b[i] is a consonant. */
+    /**
+     * @var int Position pointer in the buffer.
+     */
+    private $k;
+
+    /**
+     * @var int Secondary position pointer.
+     */
+    private $j;
+
+    /**
+     * Check if character at position i is a consonant.
+     *
+     * @param int $i Position to check
+     * @return bool True if consonant, false otherwise
+     */
     protected function cons($i) {
         if ($i > $this->k) {
             return true;
@@ -104,17 +124,18 @@ class en_stemmer implements stemmer {
         return true;
     }
 
-    /*
-    * m() measures the number of consonant sequences between 0 and j. if c is
-    * a consonant sequence and v a vowel sequence, and <..> indicates arbitrary
-    * presence,
-    *
-    *   <c><v>       gives 0
-    *   <c>vc<v>     gives 1
-    *   <c>vcvc<v>   gives 2
-    *   <c>vcvcvc<v> gives 3
-    *   ....
-    * */
+    /**
+     * Measure the number of consonant sequences between 0 and j.
+     *
+     * If c is a consonant sequence and v a vowel sequence, and <..> indicates arbitrary presence:
+     * <c><v>       gives 0
+     * <c>vc<v>     gives 1
+     * <c>vcvc<v>   gives 2
+     * <c>vcvcvc<v> gives 3
+     * ....
+     *
+     * @return int Number of consonant sequences
+     */
     protected function m() {
         $n = 0;
         $i = 0;
@@ -184,14 +205,15 @@ class en_stemmer implements stemmer {
         return $this->cons($j);
     }
 
-    /*
-    * cvc(i) is TRUE <=> i-2,i-1,i has the form consonant - vowel - consonant
-    * and also if the second c is not w,x or y. this is used when trying to
-    * restore an e at the end of a short word. e.g.
-    *
-    * cav(e), lov(e), hop(e), crim(e), but
-    * snow, box, tray.
-    * */
+    /**
+     * Check if i-2,i-1,i has the form consonant - vowel - consonant.
+     *
+     * Also checks if the second c is not w,x or y. This is used when trying to
+     * restore an e at the end of a short word. E.g. cav(e), lov(e), hop(e), crim(e), but snow, box, tray.
+     *
+     * @param int $i Position to check
+     * @return bool True if matches cvc pattern
+     */
     protected function cvc($i) {
         if ($i < 2 || !$this->cons($i) || $this->cons($i - 1) || !$this->cons($i - 2)) {
             return false;
@@ -239,6 +261,13 @@ class en_stemmer implements stemmer {
         $this->k = $this->j + $length;
     }
 
+    /**
+     * Replace suffix if m() > 0.
+     *
+     * @param string $s Replacement string
+     * @param int $length Length of string
+     * @return void
+     */
     protected function r($s, $length) {
         if ($this->m() > 0) {
             $this->setto($s, $length);
