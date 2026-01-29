@@ -281,28 +281,29 @@ class en_stemmer implements stemmer {
         }
     }
 
-    /*
-    * step1ab() gets rid of plurals and -ed or -ing. e.g.
-    *
-    *  caresses  ->  caress
-    *  ponies    ->  poni
-    *  ties      ->  ti
-    *  caress    ->  caress
-    *  cats      ->  cat
-    *
-    *  feed      ->  feed
-    *  agreed    ->  agree
-    *  disabled  ->  disable
-    *
-    *  matting   ->  mat
-    *  mating    ->  mate
-    *  meeting   ->  meet
-    *  milling   ->  mill
-    *  messing   ->  mess
-    *
-    *  meetings  ->  meet
-    *
-    * */
+    /**
+     * Step1ab() gets rid of plurals and -ed or -ing. e.g.
+     *
+     *  caresses  ->  caress
+     *  ponies    ->  poni
+     *  ties      ->  ti
+     *  caress    ->  caress
+     *  cats      ->  cat
+     *
+     *  feed      ->  feed
+     *  agreed    ->  agree
+     *  disabled  ->  disable
+     *
+     *  matting   ->  mat
+     *  mating    ->  mate
+     *  meeting   ->  meet
+     *  milling   ->  mill
+     *  messing   ->  mess
+     *
+     *  meetings  ->  meet
+     *
+     * @return void
+     */
     protected function step1ab() {
         if ($this->b[$this->k] === 's') {
             if ($this->ends("sses", 4)) {

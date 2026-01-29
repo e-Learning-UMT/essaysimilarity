@@ -21,6 +21,8 @@
  * @copyright  2022 Atthoriq Adillah Wicaksana (thoriqadillah59@gmail.com)
  * @copyright  based on work by 2022 Atthoriq Adillah Wicaksana (thoriqadillah59@gmail.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
  */
 
 defined('MOODLE_INTERNAL') || die();
