@@ -79,7 +79,8 @@ class svd {
 
     /**
      * Perform Singular Value Decomposition
-     * Translation of JAMA SVD implementation to PHP https://github.com/fiji/Jama/blob/master/src/main/java/Jama/SingularValueDecomposition.java
+     * Translation of JAMA SVD implementation to PHP.
+     * Source: https://github.com/fiji/Jama/blob/master/src/main/java/Jama/SingularValueDecomposition.java
      */
     public function decompose() {
         // Convert array key from string to numeric.
@@ -87,7 +88,7 @@ class svd {
         $n = $this->n;
         $nu = min($m, $n);
 
-        // Copy matrix to A
+        // Copy matrix to A.
         $a = $this->matrix->get();
 
         $s = array_fill(0, min($m + 1, $n), 0);

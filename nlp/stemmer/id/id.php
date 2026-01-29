@@ -179,7 +179,7 @@ class id_stemmer implements stemmer {
             }
         }
 
-        if (preg_match('/^([tmbp]e)\S{1,}/', $kata)) { // Jika awalannya adalah “te-”, “me-”, “be-”, atau “pe-”
+        if (preg_match('/^([tmbp]e)\S{1,}/', $kata)) { // Jika awalannya adalah “te-”, “me-”, “be-”, atau “pe-”.
             /*------------ Awalan “be-”, ---------------------------------------------*/
             if (preg_match('/^(be)\S{1,}/', $kata)) { // Jika awalan “be-”.
                 if (preg_match('/^(ber)[aiueo]\S{1,}/', $kata)) { // Aturan 1.
@@ -850,7 +850,7 @@ class id_stemmer implements stemmer {
             }
 
             // Cek luluh -r.
-            $kata = preg_replace('/^(diper)', 'r', $kata);
+            $kata = preg_replace('/^(diper)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
             }
@@ -875,7 +875,7 @@ class id_stemmer implements stemmer {
             }
 
             // Cek luluh -r.
-            $kata = preg_replace('/^(diter)', 'r', $kata);
+            $kata = preg_replace('/^(diter)/', 'r', $kata);
             if ($this->cek_kamus($kata)) {
                 return $kata; // Jika ada balik.
             }
@@ -1039,7 +1039,7 @@ class id_stemmer implements stemmer {
      * @return bool True if plural
      */
     private function is_plural($word) {
-        // -ku|-mu|-nya.
+        // Possessive suffixes: -ku|-mu|-nya.
         // Nikmat-Ku, etc.
         if (preg_match('/^(.*)-(ku|mu|nya|lah|kah|tah|pun)$/', $word, $words)) {
             return strpos($words[1], '-') !== false;
