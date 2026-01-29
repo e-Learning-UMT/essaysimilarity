@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="qtype_essaysimilarity">
+    <description>Moodle coding style for essaysimilarity question type</description>
+
+    <!-- Exclude third-party/legacy code from strict checking -->
+    <exclude-pattern>*/nlp/stemmer/en/en.php</exclude-pattern>
+    <exclude-pattern>*/nlp/stemmer/id/id.php</exclude-pattern>
+    <exclude-pattern>*/nlp/transformer/svd.php</exclude-pattern>
+
+    <!-- Allow multiple classes in renderer file (Moodle pattern) -->
+    <rule ref="moodle">
+        <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses"/>
+    </rule>
+</ruleset>
