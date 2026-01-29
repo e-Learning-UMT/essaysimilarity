@@ -178,9 +178,10 @@ class en_stemmer implements stemmer {
     }
 
     /**
-     * vowelinstem() is TRUE <=> 0,...j contains a vowel
+     * Check if 0,...j contains a vowel.
      *
-     * */
+     * @return bool True if contains vowel
+     */
     protected function vowelinstem() {
         for ($i = 0; $i <= $this->j; $i++) {
             if (! $this->cons($i)) {
@@ -192,8 +193,11 @@ class en_stemmer implements stemmer {
     }
 
     /**
-     * doublec(j) is TRUE <=> j,(j-1) contain a double consonant.
-     *  */
+     * Check if j,(j-1) contain a double consonant.
+     *
+     * @param int $j Position to check
+     * @return bool True if double consonant
+     */
     protected function doublec($j) {
         if ($j < 1) {
             return false;
@@ -227,11 +231,13 @@ class en_stemmer implements stemmer {
         return true;
     }
 
-    /*
-    * ends(s) is TRUE <=> 0...k ends with the string s.
-    *
-    * $length is passed as a parameter because it provides a speedup.
-    * */
+    /**
+     * Check if 0...k ends with the string s.
+     *
+     * @param string $s String to check
+     * @param int $length Length is passed as parameter for speedup
+     * @return bool True if ends with string
+     */
     protected function ends($s, $length) {
         if ($s[$length - 1] != $this->b[$this->k]) {
             return false;
@@ -250,12 +256,13 @@ class en_stemmer implements stemmer {
         return true;
     }
 
-    /*
-    * setto(s) sets (j+1),...k to the characters in the string s,
-    * readjusting k.
-    *
-    * Again $length is passed for speedup
-    * */
+    /**
+     * Set (j+1),...k to the characters in the string s, readjusting k.
+     *
+     * @param string $s String to set
+     * @param int $length Length of string (passed for speedup)
+     * @return void
+     */
     protected function setto($s, $length) {
         $this->b = substr_replace($this->b, $s, $this->j + 1);
         $this->k = $this->j + $length;
@@ -331,23 +338,25 @@ class en_stemmer implements stemmer {
         }
     }
 
-    /*
-    * step1c() turns terminal y to i when there is another
-    * vowel in the stem.
-    *
-    * */
+    /**
+     * Turn terminal y to i when there is another vowel in the stem.
+     *
+     * @return void
+     */
     protected function step1c() {
         if ($this->ends("y", 1) && $this->vowelinstem()) {
             $this->b[$this->k] = 'i';
         }
     }
 
-    /*
-    * step2() maps double suffices to single ones. so -ization
-    * ( = -ize plus -ation) maps to -ize etc. note that the string
-    * before the suffix must give m() > 0.
-    *
-    * */
+    /**
+     * Map double suffixes to single ones.
+     *
+     * So -ization (= -ize plus -ation) maps to -ize etc.
+     * Note that the string before the suffix must give m() > 0.
+     *
+     * @return void
+     */
     protected function step2() {
         switch ($this->b[$this->k - 1]) {
             case 'a':
@@ -383,7 +392,7 @@ class en_stemmer implements stemmer {
                 }
                 // -DEPARTURE-
                 // To match the published algorithm, replace the above line with
-                // if ($this->ends("abli",4)) { $this->r("able",4); break; }
+                // If ($this->ends("abli",4)) { $this->r("able",4); break; }.
                 if ($this->ends("alli", 4)) {
                     $this->r("al", 2);
                     break;
@@ -457,11 +466,11 @@ class en_stemmer implements stemmer {
         }
     }
 
-    /*
-    * step3() deals with -ic-, -full, -ness etc. similar strategy
-    * to step2.
-    *
-    * */
+    /**
+     * Deal with -ic-, -full, -ness etc. Similar strategy to step2.
+     *
+     * @return void
+     */
     protected function step3() {
         switch ($this->b[$this->k]) {
             case 'e':
@@ -503,7 +512,11 @@ class en_stemmer implements stemmer {
         }
     }
 
-    /* step4() takes off -ant, -ence etc., in context <c>vcvc<v>. */
+    /**
+     * Take off -ant, -ence etc., in context <c>vcvc<v>.
+     *
+     * @return void
+     */
     protected function step4() {
         switch ($this->b[$this->k - 1]) {
             case 'a':
@@ -609,11 +622,11 @@ class en_stemmer implements stemmer {
         }
     }
 
-    /*
-    * step5() removes a final -e if m() > 1, and
-    * changes -ll to -l if m() > 1.
-    *
-    * */
+    /**
+     * Remove a final -e if m() > 1, and change -ll to -l if m() > 1.
+     *
+     * @return void
+     */
     protected function step5() {
         $this->j = $this->k;
         if ($this->b[$this->k] === 'e') {
@@ -628,6 +641,12 @@ class en_stemmer implements stemmer {
         }
     }
 
+    /**
+     * Stem the given word using Porter algorithm.
+     *
+     * @param string $word Word to stem
+     * @return string Stemmed word
+     */
     public function stem($word) {
         $this->j = 0;
         $this->b = $word;
