@@ -37,9 +37,9 @@ class stemmer_factory {
      * @return stemmer Language-specific stemmer instance
      */
     public static function create(string $lang): stemmer {
-        require_once($lang."/".$lang.".php");
+        require_once($lang . "/" . $lang . ".php");
 
-        $stemmer = $lang."_stemmer";
+        $stemmer = $lang . "_stemmer";
         return new $stemmer();
     }
 }

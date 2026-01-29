@@ -17,8 +17,7 @@
 /**
  * Question type class for the essay question type.
  *
- * @package    qtype
- * @subpackage essaysimilarity
+ * @package    qtype_essaysimilarity
  * @copyright  2022 thoriqadillah
  * @author     thoriqadillah
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

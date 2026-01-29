@@ -70,4 +70,3 @@ class cosine_similarity {
         return $magnitude == 0 ? 0 : $dot / $magnitude;
     }
 }
-

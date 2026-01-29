@@ -17,8 +17,7 @@
 /**
  * Strings for component 'qtype_essaysimilarity', language 'en', branch 'MOODLE_20_STABLE'
  *
- * @package    qtype
- * @subpackage essaysimilarity
+ * @package    qtype_essaysimilarity
  * @copyright  2022 Atthoriq Adillah Wicaksana (thoriqadillah59@gmail.com)
  * @copyright  based on work by 2018 Gordon Bateson
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -85,21 +84,7 @@ $string['textstatitems_help'] = 'Select any items here that you wish to appear i
 $string['uniquewords'] = 'Unique words';
 $string['upper_correctness'] = 'Correctness upper threshold';
 $string['upper_correctness_help'] = 'Upper threshold ranged 0.01 - 0.99 for similarity percentage that will be marked as correct answer (has green color in review page) if the percentage is above this threshold. Leave empty to use default value (0.99)';
-
-
-
-
-
-$string['answerkey'] = 'Answer key';
-
-
-
-
-
-
-
-
-
-
+$string['weightforessaysimilarity'] = 'Weight for essay similarity';
+$string['weightforessaysimilarity_help'] = 'This value indicates the percentage of the weight applied to the essay similarity score.  Total weightage percentage cannot exceed 100 percent.';
 $string['words'] = 'Words';
 $string['wordspersentence'] = 'Words per sentence';
