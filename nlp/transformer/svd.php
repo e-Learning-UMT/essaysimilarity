@@ -82,7 +82,7 @@ class svd {
      * Translation of JAMA SVD implementation to PHP https://github.com/fiji/Jama/blob/master/src/main/java/Jama/SingularValueDecomposition.java
      */
     public function decompose() {
-        // Convert array key from string to numeric
+        // Convert array key from string to numeric.
         $m = $this->m;
         $n = $this->n;
         $nu = min($m, $n);
@@ -302,12 +302,12 @@ class svd {
             // Here is where a test for too many iterations would go.
 
             // This section of the program inspects for
-            // negligible elements in the s and e arrays.  On
+            // Negligible elements in the s and e arrays.  On
             // completion the variables kase and k are set as follows.
 
-            // kase = 1     if s(p) and e[k-1] are negligible and k<p
-            // kase = 2     if s(k) is negligible and k<p
-            // kase = 3     if e[k-1] is negligible, k<p, and
+            // Kase = 1     if s(p) and e[k-1] are negligible and k<p.
+            // Kase = 2     if s(k) is negligible and k<p.
+            // Kase = 3     if e[k-1] is negligible, k<p, and
             // s(k), ..., s(p) are not negligible (qr step).
             // kase = 4     if e(p-1) is negligible (convergence).
             for ($k = $p - 2; $k >= -1; $k--) {
@@ -351,7 +351,7 @@ class svd {
             // Perform the task indicated by kase.
             switch ($kase) {
                 // Deflate negligible s(p).
-                case 1: {
+                case 1:
                     $f = $e[$p - 2];
                     $e[$p - 2] = 0.0;
 
@@ -374,11 +374,10 @@ class svd {
                             }
                         }
                     }
-                }
                 break;
 
                 // Split at negligible s(k).
-                case 2: {
+                case 2:
                     $f = $e[$k - 1];
                     $e[$k - 1] = 0.0;
 
@@ -399,11 +398,10 @@ class svd {
                             }
                         }
                     }
-                }
                 break;
 
                 // Perform one qr step.
-                case 3: {
+                case 3:
                     // Calculate the shift.
                     $scale = max(max(
                         max(max(
@@ -476,10 +474,9 @@ class svd {
 
                     $e[$p - 2] = $f;
                     $iter = $iter + 1;
-                }
                 break;
 
-                case 4: {
+                case 4:
                     // Make the singular values positive.
                     if ($s[$k] <= 0.0) {
                         $s[$k] = ($s[$k] < 0.0 ? -$s[$k] : 0.0);
@@ -524,7 +521,6 @@ class svd {
 
                     $iter = 0;
                     $p--;
-                }
                 break;
             }
         }
